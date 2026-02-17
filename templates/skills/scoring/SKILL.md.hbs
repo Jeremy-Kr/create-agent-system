@@ -1,0 +1,35 @@
+---
+name: scoring
+description: "100-point scoring protocol. Use when score-based evaluation is needed for any feedback, review, or QA."
+---
+
+# Scoring Protocol
+
+## Rules
+- All feedback is scored on a 100-point scale, 1-point increments
+- Provide specific deduction reasons for each item
+- Never give a perfect score without justification — always include rationale
+
+## Scoring Format
+
+```
+### Score: {total}/100
+
+| Item | Score | Deduction Reason |
+|------|-------|-----------------|
+| {item1} | {score}/{weight} | {specific reason or "None"} |
+| {item2} | {score}/{weight} | {specific reason or "None"} |
+| ... | ... | ... |
+```
+
+## Severity Thresholds
+- 90-100: Ready to merge immediately
+- 80-89: Minor fixes, then merge
+- 70-79: Fixes needed, re-review required
+- 60-69: Significant rework needed, 1 revision chance, failure if below 70 on re-score
+- Below 60: Immediate failure, redesign required
+
+## Examples
+"Spec completeness 85/100 — Error handling scenarios missing (-10), edge cases undefined (-5)"
+"Visual quality 88/100 — Mobile spacing mismatch (-7), hover state not implemented (-5)"
+"QA overall 79/100 — E2E error scenarios uncovered (-8), mobile layout broken (-7), 3 uses of type any (-6)"

@@ -1,0 +1,51 @@
+---
+name: visual-qa
+description: "Playwright MCP-based visual quality verification. Use when screenshot-based QA is needed after UI implementation. Level system for progressive application."
+---
+
+# Visual QA with Playwright MCP
+
+## Visual QA Levels
+
+Orchestrator designates per EPIC or task.
+
+### Level 0: Skip
+- **When**: Prototyping, tech spikes, backend-only EPICs
+- **Screenshots**: None
+- **Scoring**: None
+
+### Level 1: Spot Check
+- **When**: Before design system is established, initial layout exploration, Small projects
+- **Screenshots**: Desktop (1280px) only, 1 shot
+- **Scoring**: None, subjective comments only
+
+### Level 2: Standard (Default)
+- **When**: After design system is established, general EPICs
+- **Screenshots**: Mobile (375px) + Desktop (1280px)
+- **Scoring**: 100 points, simplified weights
+  - Design token compliance: 35 points
+  - Responsive behavior: 35 points
+  - Overall completeness: 30 points
+
+### Level 3: Strict
+- **When**: Landing pages, payment flows, UX-critical EPICs
+- **Screenshots**: Mobile (375px) + Tablet (768px) + Desktop (1280px)
+- **Scoring**: 100 points, full weights
+  - Design token compliance: 30 points
+  - Responsive behavior: 25 points
+  - Interaction states: 20 points
+  - Edge case UI: 15 points
+  - Overall completeness: 10 points
+- **Additional**: Dark mode, interaction state captures (hover, focus, active, disabled)
+
+## Verification Checklist (Level 2+)
+- [ ] Design token compliance (color, spacing, typography)
+- [ ] Component alignment and spacing
+- [ ] Responsive layout behavior
+- [ ] Text overflow / truncation
+- [ ] Loading / error / empty states
+
+## Additional Checklist (Level 3 only)
+- [ ] Interaction states (hover, focus, active, disabled)
+- [ ] Dark mode (if applicable)
+- [ ] Animations / transitions

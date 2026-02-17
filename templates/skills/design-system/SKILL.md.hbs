@@ -1,0 +1,34 @@
+---
+name: design-system
+description: "Design system construction guide. Use when creating design tokens, scaffolding components, or generating spacing guides."
+---
+
+# Design System Guide
+
+## Deliverables
+
+### 1. Design Tokens (`src/styles/tokens.ts`)
+- Primary, Secondary, Neutral color palette (50~900 scale)
+- Semantic colors (error, warning, success, info)
+- Spacing scale (xs ~ 2xl)
+- Typography (fontFamily, fontSize, fontWeight, lineHeight)
+- Border radius, shadow scale
+
+### 2. Tailwind/CSS Variable Mapping
+- `tailwind.config.ts` extension or `src/styles/globals.css` CSS variables
+
+### 3. Base Component Scaffolding
+| Component | Variants |
+|-----------|----------|
+| Button | Primary, Secondary, Ghost, Destructive, each size (sm/md/lg) |
+| Input | Text, Select, Checkbox, Radio, Textarea |
+| Card | Default, Outlined, Elevated |
+| Modal | Default, Confirm, Fullscreen |
+| Toast | Success, Error, Warning, Info |
+| Layout | Container, Stack (vertical/horizontal), Grid |
+
+### 4. Spacing/Margin Guide (`docs/design-system.md`)
+
+## Scope Limitation
+The agent generates a code-based design system.
+This produces working components and tokens, not Figma mockups.

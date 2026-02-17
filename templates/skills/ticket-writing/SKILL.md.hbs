@@ -1,0 +1,52 @@
+---
+name: ticket-writing
+description: "User story-based ticket writing guide. Use when breaking down specs into tickets."
+---
+
+# Ticket Writing Guide
+
+## Ticket Format (Medium/Large)
+
+```markdown
+## [EPIC-{number}] {EPIC title}
+
+### TICKET-{number}: {ticket title}
+- **User Story**: As a {role}, I want {feature}, so that {value}
+- **Acceptance Criteria**:
+  - [ ] Criterion 1
+  - [ ] Criterion 2
+  - [ ] Error handling: ...
+  - [ ] Edge case: ...
+- **Estimated Effort**: {0.5h ~ 2h}
+- **Dependencies**: TICKET-{number} (or "None")
+- **EPIC**: EPIC-{number}
+```
+
+## Small Project Ticket Format
+Write a flat ticket list without EPIC grouping:
+
+```markdown
+### TICKET-{number}: {ticket title}
+- **User Story**: As a {role}, I want {feature}, so that {value}
+- **Acceptance Criteria**:
+  - [ ] Criterion 1
+  - [ ] Criterion 2
+  - [ ] Error handling: ...
+- **Estimated Effort**: {0.5h ~ 2h}
+- **Dependencies**: TICKET-{number} (or "None")
+```
+
+## EPIC Dependencies (Medium/Large)
+Always include an EPIC dependency map when writing tickets:
+```markdown
+## EPIC Dependency Map
+EPIC-01 (Auth) → None
+EPIC-02 (Dashboard) → EPIC-01
+EPIC-03 (Settings) → EPIC-01, EPIC-02
+```
+
+## Rules
+- Max 2 hours per ticket for a senior developer, smaller is better
+- User story format is required
+- Acceptance criteria must include error handling and edge cases
+- Dependencies must be explicitly recorded
