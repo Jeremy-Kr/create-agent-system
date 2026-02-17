@@ -9,6 +9,7 @@
 - All work starts in plan mode
 - Do not modify finalized specs without a CR (Change Request)
 - All feedback must be scored on a 100-point scale (1-point increments) with specific deduction reasons
+- **Always spawn agents as Agent Teams** (TeamCreate → Task with team_name), never as standalone subagents. This enables TaskList-based coordination and mailbox communication between agents.
 
 ## Build & Test Commands
 - `pnpm build` — tsup build
