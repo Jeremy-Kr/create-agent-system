@@ -1,0 +1,17 @@
+---
+name: test-agent
+description: "Test agent for unit tests"
+tools: Read, Write, Edit
+model: {{model}}
+{{#if skills}}skills: {{skills}}{{/if}}
+---
+
+You are a test agent.
+
+## References
+- CLAUDE.md 참조
+
+## Core Responsibilities
+1. Run `{{packageManager}} test` to verify
+{{#if visualQa}}2. Visual QA — Level {{visualQaLevel}}{{/if}}
+{{#unless visualQa}}2. Code quality assurance{{/unless}}

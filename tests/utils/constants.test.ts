@@ -99,22 +99,22 @@ describe('Constants (TICKET-003)', () => {
     });
 
     it('architect should have scoring, adr-writing', () => {
-      expect(AGENT_DEFAULT_SKILLS['architect']).toEqual(
+      expect(AGENT_DEFAULT_SKILLS.architect).toEqual(
         expect.arrayContaining(['scoring', 'adr-writing']),
       );
-      expect(AGENT_DEFAULT_SKILLS['architect']).toHaveLength(2);
+      expect(AGENT_DEFAULT_SKILLS.architect).toHaveLength(2);
     });
 
     it('cto should have scoring', () => {
-      expect(AGENT_DEFAULT_SKILLS['cto']).toEqual(expect.arrayContaining(['scoring']));
-      expect(AGENT_DEFAULT_SKILLS['cto']).toHaveLength(1);
+      expect(AGENT_DEFAULT_SKILLS.cto).toEqual(expect.arrayContaining(['scoring']));
+      expect(AGENT_DEFAULT_SKILLS.cto).toHaveLength(1);
     });
 
     it('designer should have design-system, visual-qa, scoring', () => {
-      expect(AGENT_DEFAULT_SKILLS['designer']).toEqual(
+      expect(AGENT_DEFAULT_SKILLS.designer).toEqual(
         expect.arrayContaining(['design-system', 'visual-qa', 'scoring']),
       );
-      expect(AGENT_DEFAULT_SKILLS['designer']).toHaveLength(3);
+      expect(AGENT_DEFAULT_SKILLS.designer).toHaveLength(3);
     });
 
     it('test-writer should have tdd-workflow, scoring', () => {

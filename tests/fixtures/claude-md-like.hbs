@@ -1,0 +1,29 @@
+# Project Memory
+
+## 프로젝트 개요
+- {{projectName}}
+{{#if specPath}}- 스펙: @{{specPath}}{{/if}}
+
+## 빌드 명령어
+- `{{packageManager}} test`
+
+{{#if visualQa}}- 시각적 QA Level {{visualQaLevel}}{{/if}}
+
+## 에이전트 컨텍스트
+
+| 에이전트 | 역할 |
+|----------|------|
+{{#each activeAgents}}
+| {{this.displayName}} | {{this.alwaysRead}} |
+{{/each}}
+
+## 파일 소유권
+
+{{#each fileOwnership}}
+| `{{this.path}}` | {{this.owner}} |
+{{/each}}
+
+{{#if epicBased}}
+## EPIC 의존성 관리
+Orchestrator가 EPIC 실행 순서를 관리한다.
+{{/if}}
