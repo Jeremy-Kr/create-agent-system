@@ -51,10 +51,11 @@ EPIC-07 (Integration & Docs) → EPIC-06
     - Verifies `frontend-dev.md` has `skills: scoring` (visual-qa excluded because not in preset)
     - Verifies `backend-dev.md` has `skills: scoring`
     - Verifies `qa-reviewer.md` has `skills: scoring` (visual-qa excluded)
-  - [ ] Test: `solo-dev CLAUDE.md does not contain EPIC section`
+  - [ ] Test: `solo-dev CLAUDE.md does not contain EPIC section but does contain visual QA`
     - Reads generated `CLAUDE.md`
     - Verifies it does NOT contain "EPIC" dependency management section
     - Verifies it DOES contain failure modes and recovery section
+    - Verifies it DOES contain visual QA common rule with "Level 1" (solo-dev has visualQaLevel: 1)
   - [ ] Test: `solo-dev validation passes`
     - Runs validator on the scaffolded output
     - Verifies `valid: true`, `errors: []`
@@ -120,9 +121,9 @@ EPIC-07 (Integration & Docs) → EPIC-06
 
 ---
 
-## TICKET-019: README.md and LICENSE
+## TICKET-019: README.md, LICENSE, and CONTRIBUTING.md
 
-- **User Story**: As a potential user discovering create-agent-system on npm or GitHub, I want clear documentation explaining what the tool does, how to install it, and how to use it, so that I can quickly evaluate and adopt it.
+- **User Story**: As a potential user discovering create-agent-system on npm or GitHub, I want clear documentation explaining what the tool does, how to install and use it, and how to contribute, so that I can quickly evaluate, adopt, and contribute to the project.
 
 - **Acceptance Criteria**:
 
@@ -181,6 +182,13 @@ EPIC-07 (Integration & Docs) → EPIC-06
   - [ ] Contains the MIT license text
   - [ ] Copyright year: 2025 (project inception year)
   - [ ] Copyright holder: as specified by project owner
+
+  **CONTRIBUTING.md:**
+  - [ ] `CONTRIBUTING.md` exists in the project root (per spec directory structure)
+  - [ ] Contains: Development setup instructions (clone, pnpm install, pnpm build, pnpm test)
+  - [ ] Contains: Code style guidelines (TypeScript strict, Biome, 2-space indent)
+  - [ ] Contains: PR process (branch naming, commit format, review checklist)
+  - [ ] Contains: How to add new presets, agents, or skills
 
   - [ ] **Edge case**: README renders correctly on both GitHub and npm
   - [ ] **Edge case**: Badge URLs use shields.io or equivalent reliable CDN

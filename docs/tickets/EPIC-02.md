@@ -59,7 +59,7 @@ EPIC-07 (Integration & Docs) → EPIC-06
   - [ ] YAML files are valid and parseable by the `yaml` npm package
   - [ ] YAML uses `snake_case` for workflow keys (e.g., `review_max_rounds`, `qa_mode`, `visual_qa_level`, `epic_based`) -- these will be converted to `camelCase` by the loader
   - [ ] All 8 agent names are present in every preset (even disabled ones use `enabled: false`)
-  - [ ] **Edge case**: `solo-dev` has exactly 4 agents enabled (po-pm, test-writer, frontend-dev, backend-dev, qa-reviewer) and 3 disabled (architect, cto, designer) -- verify this matches the spec where qa-reviewer is enabled
+  - [ ] **Edge case**: `solo-dev` has exactly 5 agents enabled (po-pm, test-writer, frontend-dev, backend-dev, qa-reviewer) and 3 disabled (architect, cto, designer) -- verify this matches the spec where qa-reviewer is enabled
   - [ ] **Edge case**: `full-team` and `small-team` differ ONLY in `scale` and `visual_qa_level` (2 vs 3)
 
 - **Estimated Effort**: 0.5h
@@ -94,8 +94,8 @@ EPIC-07 (Integration & Docs) → EPIC-06
     - Example: `Failed to load preset "solo-dev": file not found at /path/to/presets/solo-dev.yaml`
   - [ ] **Error handling**: Throws if required fields are missing after parsing (name, description, scale, agents, workflow, skills)
   - [ ] **Edge case**: Loader works correctly when the package is installed globally, locally, or run via `npx` (the `import.meta.url` approach handles all cases)
-  - [ ] **Edge case**: The loader handles the bundled output from `tsup` correctly (presets directory must be accessible relative to the bundled dist file)
-    - NOTE: `tsup` does not copy non-TS assets. The build process must ensure `presets/` is accessible. Document this requirement (e.g., `tsup` `publicDir` option or a copy script in `package.json`)
+  - [ ] **Edge case**: The loader handles the bundled output from `tsdown` correctly (presets directory must be accessible relative to the bundled dist file)
+    - NOTE: `tsdown` does not copy non-TS assets. The build process must ensure `presets/` is accessible. Document this requirement (e.g., `tsdown` `copy` option or a copy script in `package.json`)
   - [ ] Unit tests exist for `loadPreset`:
     - Successfully loads each of the 3 presets
     - Returns correct camelCase workflow config

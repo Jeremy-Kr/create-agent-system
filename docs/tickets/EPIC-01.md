@@ -34,13 +34,13 @@ EPIC-07 (Integration & Docs) → EPIC-06
     - `@clack/prompts` (interactive prompts)
     - `handlebars` (template engine)
     - `yaml` (YAML parsing)
-    - `fs-extra` (file system utilities)
+    - (no fs-extra -- use `node:fs/promises` and `node:fs` directly)
   - [ ] Dev dependencies installed (`devDependencies` section):
     - `typescript`
-    - `tsup` (bundler)
+    - `tsdown` (bundler)
     - `vitest` (test runner)
     - `@biomejs/biome` (linter/formatter)
-    - `@types/fs-extra`
+    - (no @types/fs-extra -- not needed with node:fs)
     - `@types/node`
   - [ ] `tsconfig.json` exists with:
     - `strict: true`
@@ -50,12 +50,11 @@ EPIC-07 (Integration & Docs) → EPIC-06
     - `outDir`: `"./dist"`
     - `rootDir`: `"./src"`
     - Path aliases configured if needed (e.g., `@/` -> `src/`)
-  - [ ] `tsup.config.ts` exists with:
+  - [ ] `tsdown.config.ts` exists with:
     - Entry point: `src/index.ts`
     - Format: `["esm"]`
     - `dts: true` (type declarations)
     - `clean: true`
-    - `shims: true` (for `__dirname` / `import.meta.url` compatibility)
   - [ ] `vitest.config.ts` exists with sensible defaults (e.g., globals, include pattern)
   - [ ] `biome.json` exists with formatting (2-space indent) and linting rules configured
   - [ ] `src/index.ts` exists as a placeholder entry point (can be an empty export or minimal CLI bootstrap)
@@ -161,9 +160,9 @@ EPIC-07 (Integration & Docs) → EPIC-06
   - [ ] `src/utils/fs.ts` exports:
     - `fileExists(filePath: string): Promise<boolean>` — checks if a file exists
     - `dirExists(dirPath: string): Promise<boolean>` — checks if a directory exists
-    - `ensureDir(dirPath: string): Promise<void>` — creates directory recursively if it doesn't exist
+    - `ensureDir(dirPath: string): Promise<void>` — creates directory recursively if it doesn't exist (uses `fs.mkdir(dirPath, { recursive: true })`)
     - `writeFileSafe(filePath: string, content: string, overwrite?: boolean): Promise<{ written: boolean; skipped: boolean }>` — writes file, returns `skipped: true` if file exists and `overwrite` is false
-    - All functions use `fs-extra` under the hood
+    - All functions use `node:fs/promises` (and `node:fs` for sync checks where needed)
   - [ ] `src/utils/detect.ts` exports:
     - `detectPackageManager(targetDir: string): Promise<'npm' | 'yarn' | 'pnpm' | 'bun'>` — detects package manager by checking lock files (`pnpm-lock.yaml` -> pnpm, `yarn.lock` -> yarn, `bun.lockb` -> bun, fallback: npm)
     - `detectTechStack(targetDir: string): Promise<TechStackInfo>` — reads `package.json` dependencies to detect framework (next, react, vue, etc.), language (typescript if tsconfig exists), CSS framework (tailwindcss), and package manager

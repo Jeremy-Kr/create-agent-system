@@ -44,7 +44,7 @@ EPIC-07 (Integration & Docs) → EPIC-06
       ```
   - [ ] The `scaffold` function performs these steps in order:
     1. Create `.claude/agents/` directory
-    2. Create `.claude/skills/` directory
+    2. Create `.claude/skills/` directory (this is the parent; individual skill subdirectories are created by the skill-installer or fallback path)
     3. For each **enabled** agent in the preset:
        a. Compute the agent's skills using `computeAgentSkills()` (TICKET-012)
        b. Compose template data (model, skills string, packageManager, visualQa, epicBased)

@@ -157,7 +157,7 @@ EPIC-07 (Integration & Docs) → EPIC-06
   - [ ] `{{#if visualQa}}` wraps visual QA references in common rules
   - [ ] Visual QA level is displayed: `(default: Level {{visualQaLevel}})`
   - [ ] **Edge case**: When `epicBased: false` (solo-dev), the EPIC section is completely omitted
-  - [ ] **Edge case**: When `visualQa: false` (solo-dev with level 0), visual QA lines in common rules are omitted
+  - [ ] **Edge case**: Solo-dev has `visualQaLevel: 1` but does NOT include `visual-qa` in preset skills. The `composeClaudeMdData` uses `visualQaLevel > 0` to determine `visualQa`, so solo-dev CLAUDE.md WILL include the visual QA common rule line (with "Level 1"). When a preset has `visualQaLevel: 0`, those lines are omitted entirely.
   - [ ] **Edge case**: `activeAgents` only contains enabled agents -- disabled agents should not appear in the context rules table
   - [ ] Rendered output is valid markdown with proper table formatting
   - [ ] Unit test verifies rendering with solo-dev data (fewer agents, no EPIC, visual QA level 1)
@@ -202,6 +202,7 @@ EPIC-07 (Integration & Docs) → EPIC-06
   - [ ] **Edge case**: `installSkill` has a timeout (e.g., 30 seconds per skill) to prevent hanging
   - [ ] **Edge case**: If `targetDir` does not exist, throw an error before attempting installation
   - [ ] **Edge case**: Skill names are validated against `SKILL_NAMES` constant before execution (prevent arbitrary command injection)
+  - [ ] **Fallback path**: If `npx @anthropic/skills add` fails (registry not ready, no network), fall back to copying bundled skill templates from `templates/skills/{skillName}/SKILL.md.hbs`. Render the template with minimal data and write to `.claude/skills/{skillName}/SKILL.md`. See TICKET-010 implementation note for context.
   - [ ] Unit tests exist with mocked child_process:
     - Successful installation of a single skill
     - Successful installation of multiple skills (verifies find-skills installed first)
