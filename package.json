@@ -1,12 +1,50 @@
 {
   "name": "create-agent-system",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "version": "0.1.0",
+  "description": "Scaffold Claude Code Agent Teams-based development systems into your project",
+  "type": "module",
+  "bin": {
+    "create-agent-system": "./dist/index.js"
   },
-  "keywords": [],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "templates",
+    "presets"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "claude",
+    "agent",
+    "teams",
+    "scaffold",
+    "cli"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^1.0.1",
+    "commander": "^14.0.0",
+    "handlebars": "^4.7.8",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.0",
+    "@types/node": "^22.0.0",
+    "tsdown": "^0.20.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.0"
+  }
 }
