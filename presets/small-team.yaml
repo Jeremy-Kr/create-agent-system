@@ -1,0 +1,28 @@
+name: small-team
+description: "소규모 팀용. CTO 리뷰 포함, EPIC 기반 개발."
+scale: medium
+
+agents:
+  po-pm: { enabled: true, model: opus }
+  architect: { enabled: true, model: opus }
+  cto: { enabled: true, model: opus }
+  designer: { enabled: true, model: opus }
+  test-writer: { enabled: true, model: opus }
+  frontend-dev: { enabled: true, model: opus }
+  backend-dev: { enabled: true, model: opus }
+  qa-reviewer: { enabled: true, model: opus }
+
+workflow:
+  review_max_rounds: 5
+  qa_mode: standard
+  visual_qa_level: 2
+  epic_based: true
+
+skills:
+  - scoring
+  - visual-qa
+  - tdd-workflow
+  - adr-writing
+  - ticket-writing
+  - design-system
+  - cr-process

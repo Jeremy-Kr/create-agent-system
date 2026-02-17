@@ -1,0 +1,25 @@
+name: solo-dev
+description: "1인 개발자용. 축약된 워크플로우, 핵심 에이전트만."
+scale: small
+
+agents:
+  po-pm: { enabled: true, model: opus }
+  architect: { enabled: false, model: opus }
+  cto: { enabled: false, model: opus }
+  designer: { enabled: false, model: opus }
+  test-writer: { enabled: true, model: opus }
+  frontend-dev: { enabled: true, model: opus }
+  backend-dev: { enabled: true, model: opus }
+  qa-reviewer: { enabled: true, model: opus }
+
+workflow:
+  review_max_rounds: 0
+  qa_mode: lite
+  visual_qa_level: 1
+  epic_based: false
+
+skills:
+  - scoring
+  - tdd-workflow
+  - ticket-writing
+  - cr-process
