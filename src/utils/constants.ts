@@ -95,6 +95,47 @@ export function getSkillDescription(name: SkillName): string {
   return t(key);
 }
 
+export const AGENT_CONTEXT_RULES: Record<
+  AgentName,
+  { alwaysRead: string; onDemand: string; exclude: string }
+> = {
+  'po-pm': { alwaysRead: 'CLAUDE.md, spec.md', onDemand: 'tickets/', exclude: 'src/, tests/' },
+  architect: {
+    alwaysRead: 'CLAUDE.md, adr/',
+    onDemand: 'spec.md, tickets/',
+    exclude: 'src/, tests/',
+  },
+  cto: { alwaysRead: 'CLAUDE.md, adr/', onDemand: 'spec.md, tickets/', exclude: 'tests/' },
+  designer: {
+    alwaysRead: 'CLAUDE.md, design-system.md',
+    onDemand: 'spec.md',
+    exclude: 'src/api/, tests/',
+  },
+  'test-writer': {
+    alwaysRead: 'CLAUDE.md, spec.md, tickets/',
+    onDemand: 'src/types/',
+    exclude: 'src/core/, src/components/',
+  },
+  'frontend-dev': {
+    alwaysRead: 'CLAUDE.md, adr/, design-system.md',
+    onDemand: 'spec.md',
+    exclude: 'src/api/, src/core/',
+  },
+  'backend-dev': { alwaysRead: 'CLAUDE.md, adr/', onDemand: 'spec.md', exclude: 'src/components/' },
+  'qa-reviewer': { alwaysRead: 'CLAUDE.md, spec.md', onDemand: 'adr/, tickets/', exclude: '-' },
+};
+
+export const FILE_OWNERSHIP: Array<{ path: string; owner: string }> = [
+  { path: 'src/components/', owner: 'frontend-dev' },
+  { path: 'src/core/', owner: 'backend-dev' },
+  { path: 'src/api/', owner: 'backend-dev' },
+  { path: 'src/types/shared.ts', owner: 'backend-dev' },
+  { path: 'tests/', owner: 'test-writer' },
+  { path: 'docs/spec.md', owner: 'po-pm' },
+  { path: 'docs/tickets/', owner: 'po-pm' },
+  { path: 'docs/adr/', owner: 'architect' },
+];
+
 export const AGENT_DEFAULT_SKILLS: Record<AgentName, SkillName[]> = {
   'po-pm': ['scoring', 'ticket-writing', 'cr-process'],
   architect: ['scoring', 'adr-writing'],

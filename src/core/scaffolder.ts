@@ -4,9 +4,12 @@ import { t } from '../i18n/index.js';
 import type { AgentName, SkillName, TechStackInfo } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
 import {
+  AGENT_CONTEXT_RULES,
   AGENT_DEFAULT_SKILLS,
+  AGENT_DISPLAY_NAMES,
   AGENTS_DIR,
   CLAUDE_MD_FILE,
+  FILE_OWNERSHIP,
   SETTINGS_FILE,
 } from '../utils/constants.js';
 import { ensureDir, fileExists, writeFileSafe } from '../utils/fs.js';
@@ -56,73 +59,6 @@ export function composeAgentTemplateData(
   };
 }
 
-// Agent context rules mapping (hardcoded from v2.3 spec)
-const AGENT_CONTEXT_RULES: Record<
-  AgentName,
-  { displayName: string; alwaysRead: string; onDemand: string; exclude: string }
-> = {
-  'po-pm': {
-    displayName: 'PO/PM',
-    alwaysRead: 'CLAUDE.md, spec.md',
-    onDemand: 'tickets/',
-    exclude: 'src/, tests/',
-  },
-  architect: {
-    displayName: 'Architect',
-    alwaysRead: 'CLAUDE.md, adr/',
-    onDemand: 'spec.md, tickets/',
-    exclude: 'src/, tests/',
-  },
-  cto: {
-    displayName: 'CTO',
-    alwaysRead: 'CLAUDE.md, adr/',
-    onDemand: 'spec.md, tickets/',
-    exclude: 'tests/',
-  },
-  designer: {
-    displayName: 'Designer',
-    alwaysRead: 'CLAUDE.md, design-system.md',
-    onDemand: 'spec.md',
-    exclude: 'src/api/, tests/',
-  },
-  'test-writer': {
-    displayName: 'Test Writer',
-    alwaysRead: 'CLAUDE.md, spec.md, tickets/',
-    onDemand: 'src/types/',
-    exclude: 'src/core/, src/components/',
-  },
-  'frontend-dev': {
-    displayName: 'Frontend Dev',
-    alwaysRead: 'CLAUDE.md, adr/, design-system.md',
-    onDemand: 'spec.md',
-    exclude: 'src/api/, src/core/',
-  },
-  'backend-dev': {
-    displayName: 'Backend Dev',
-    alwaysRead: 'CLAUDE.md, adr/',
-    onDemand: 'spec.md',
-    exclude: 'src/components/',
-  },
-  'qa-reviewer': {
-    displayName: 'QA Reviewer',
-    alwaysRead: 'CLAUDE.md, spec.md',
-    onDemand: 'adr/, tickets/',
-    exclude: '-',
-  },
-};
-
-// File ownership mapping (hardcoded from v2.3 spec)
-const FILE_OWNERSHIP: Array<{ path: string; owner: string }> = [
-  { path: 'src/components/', owner: 'frontend-dev' },
-  { path: 'src/core/', owner: 'backend-dev' },
-  { path: 'src/api/', owner: 'backend-dev' },
-  { path: 'src/types/shared.ts', owner: 'backend-dev' },
-  { path: 'tests/', owner: 'test-writer' },
-  { path: 'docs/spec.md', owner: 'po-pm' },
-  { path: 'docs/tickets/', owner: 'po-pm' },
-  { path: 'docs/adr/', owner: 'architect' },
-];
-
 export function composeClaudeMdData(
   preset: Preset,
   projectName: string,
@@ -139,7 +75,10 @@ export function composeClaudeMdData(
     visualQa: preset.workflow.visualQaLevel > 0,
     visualQaLevel: preset.workflow.visualQaLevel,
     epicBased: preset.workflow.epicBased,
-    activeAgents: enabledAgents.map((name) => AGENT_CONTEXT_RULES[name]),
+    activeAgents: enabledAgents.map((name) => ({
+      displayName: AGENT_DISPLAY_NAMES[name],
+      ...AGENT_CONTEXT_RULES[name],
+    })),
     fileOwnership: FILE_OWNERSHIP,
     headings: {
       projectMemory: t('heading.project_memory'),
