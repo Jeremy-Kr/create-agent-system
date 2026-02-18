@@ -1,7 +1,7 @@
 {
   "name": "create-agent-system",
-  "version": "0.4.0",
-  "description": "Claude Code Agent Teams 스캐폴딩 도구. /scaffold, /add, /search, /validate 커맨드 제공.",
+  "version": "1.0.0",
+  "description": "Claude Code Agent Teams 스캐폴딩 도구. /scaffold, /add, /search, /validate, /edit, /migrate 커맨드 제공.",
   "author": { "name": "Jeremy" },
   "license": "MIT",
   "keywords": ["scaffolding", "agents", "teams", "cli"]

@@ -62,7 +62,7 @@ skills:
   });
 
   it('should not overwrite existing language field', async () => {
-    const configWithLang = baseConfig + 'language: ko\n';
+    const configWithLang = `${baseConfig}language: ko\n`;
     await writeFile(join(tempDir, CONFIG_FILE_NAME), configWithLang, 'utf-8');
     await v02ToV10.migrate({ targetDir: tempDir, dryRun: false });
 

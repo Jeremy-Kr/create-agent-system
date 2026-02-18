@@ -27,7 +27,7 @@ import type { Preset } from './types/preset.js';
 import { PRESET_NAMES } from './utils/constants.js';
 import { detectTechStack } from './utils/detect.js';
 
-export const VERSION = '0.4.0';
+export const VERSION = '1.0.0';
 
 async function resolvePresetForDiff(nameOrPath: string): Promise<Preset> {
   if ((PRESET_NAMES as readonly string[]).includes(nameOrPath)) {
