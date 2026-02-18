@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
+import type { Locale } from '../i18n/types.js';
 import type { PresetName, SkillName, WorkflowConfig } from '../types/config.js';
 import type { ConfigFile } from '../types/config-file.js';
 import type { Preset } from '../types/preset.js';
@@ -27,7 +28,7 @@ function convertWorkflowToSnake(workflow: WorkflowConfig): RawWorkflow {
 
 export async function loadConfigFile(
   targetDir: string,
-): Promise<{ preset: Preset; projectName: string }> {
+): Promise<{ preset: Preset; projectName: string; language?: Locale }> {
   const filePath = getConfigFilePath(targetDir);
   let content: string;
   try {
@@ -92,7 +93,9 @@ export async function loadConfigFile(
     skills,
   };
 
-  return { preset, projectName };
+  const language = (raw.language as Locale) || undefined;
+
+  return { preset, projectName, language };
 }
 
 export async function saveConfigFile(
@@ -100,6 +103,7 @@ export async function saveConfigFile(
   preset: Preset,
   projectName: string,
   basePreset?: PresetName,
+  language?: Locale,
 ): Promise<string> {
   const configFile: ConfigFile = {
     version: '0.2',
@@ -109,6 +113,7 @@ export async function saveConfigFile(
     agents: preset.agents,
     workflow: preset.workflow,
     skills: preset.skills,
+    language,
   };
 
   // Convert to snake_case YAML structure
@@ -126,6 +131,7 @@ export async function saveConfigFile(
   yamlObj.workflow = convertWorkflowToSnake(configFile.workflow);
 
   yamlObj.skills = configFile.skills;
+  if (configFile.language) yamlObj.language = configFile.language;
 
   const yamlContent = stringifyYaml(yamlObj, { lineWidth: 120 });
   const filePath = getConfigFilePath(targetDir);

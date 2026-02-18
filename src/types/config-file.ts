@@ -1,3 +1,4 @@
+import type { Locale } from '../i18n/types.js';
 import type { AgentConfig, AgentName, PresetName, SkillName, WorkflowConfig } from './config.js';
 
 export interface ConfigFile {
@@ -8,4 +9,5 @@ export interface ConfigFile {
   agents: Record<AgentName, AgentConfig>;
   workflow: WorkflowConfig;
   skills: SkillName[];
+  language?: Locale;
 }
