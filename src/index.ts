@@ -20,6 +20,8 @@ import { installFromRegistry } from './core/registry-installer.js';
 import { listRegistry, searchRegistry } from './core/registry-search.js';
 import { scaffold } from './core/scaffolder.js';
 import { validate } from './core/validator.js';
+import { detectSystemLocale } from './i18n/detect.js';
+import { initI18n, t } from './i18n/index.js';
 import type { PresetName, TechStackInfo } from './types/config.js';
 import type { Preset } from './types/preset.js';
 import { PRESET_NAMES } from './utils/constants.js';
@@ -66,7 +68,7 @@ async function handleAdd(args: ParsedArgs, targetDir: string): Promise<never> {
     onDependencies: promptDependencyInstall,
   });
   displayInstallResults(result);
-  clack.outro('Done!');
+  clack.outro(t('display.done'));
   process.exit(result.installed.length > 0 ? 0 : 1);
 }
 
@@ -94,6 +96,7 @@ async function handleList(args: ParsedArgs): Promise<never> {
 async function main() {
   try {
     const args = parseArgs(process.argv.slice(2));
+    initI18n(args.lang ?? detectSystemLocale());
     const targetDir = args.target ?? resolve('.');
 
     if (args.command === 'validate') {
@@ -141,15 +144,15 @@ async function main() {
       preset = loaded.preset;
       projectName = loaded.projectName;
       clack.intro(`create-agent-system v${VERSION}`);
-      clack.log.info('Loaded config from agent-system.config.yaml');
+      clack.log.info(t('display.config_loaded'));
       clack.log.info(`Project: ${projectName}, Base: ${preset.name}`);
 
       const useConfig = await clack.confirm({
-        message: 'Use this config?',
+        message: t('prompt.use_config'),
         initialValue: true,
       });
       if (clack.isCancel(useConfig)) {
-        clack.cancel('Operation cancelled.');
+        clack.cancel(t('prompt.cancel'));
         process.exit(0);
       }
 
@@ -162,11 +165,11 @@ async function main() {
         // Ask about Claude Code launch
         if (!args.noRun) {
           const launch = await clack.confirm({
-            message: 'Start Claude Code in plan mode?',
+            message: t('prompt.start_claude'),
             initialValue: true,
           });
           if (clack.isCancel(launch)) {
-            clack.cancel('Operation cancelled.');
+            clack.cancel(t('prompt.cancel'));
             process.exit(0);
           }
           shouldRunClaude = launch as boolean;
@@ -182,7 +185,7 @@ async function main() {
 
     // Run scaffolder
     if (args.dryRun) {
-      clack.log.info('[DRY RUN] The following files would be created:');
+      clack.log.info(t('display.dry_run'));
     }
 
     const result = await scaffold({
@@ -205,7 +208,7 @@ async function main() {
     // Save config file if requested
     if (args.saveConfig && !args.dryRun) {
       const configPath = await saveConfigFile(targetDir, preset, projectName, basePresetName);
-      clack.log.success(`Config saved: ${configPath}`);
+      clack.log.success(t('display.config_saved', { path: configPath }));
     }
 
     // Optionally launch Claude Code
@@ -213,7 +216,7 @@ async function main() {
       await runClaudeCode(targetDir);
     }
 
-    clack.outro('Done! Happy coding.');
+    clack.outro(t('display.done'));
   } catch (error) {
     if (error instanceof Error) {
       clack.log.error(error.message);

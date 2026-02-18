@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import { Command } from 'commander';
+import type { Locale } from '../i18n/types.js';
 import type { PresetName } from '../types/config.js';
 import type { RegistryItemType } from '../types/registry.js';
 import { isRegistryItemType } from '../types/registry.js';
@@ -24,6 +25,7 @@ export interface ParsedArgs {
   force?: boolean;
   installed?: boolean;
   quiet?: boolean;
+  lang?: Locale;
 }
 
 export function parseArgs(argv: string[]): ParsedArgs {
@@ -80,6 +82,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
     .option('--save-config', 'save current config to agent-system.config.yaml')
     .option('--config <path>', 'path to config file')
     .option('--ignore-config', 'ignore existing config file')
+    .option('-l, --lang <locale>', 'language (ko, en)')
     .exitOverride()
     .configureOutput({ writeOut: () => {}, writeErr: () => {} });
 
@@ -97,6 +100,14 @@ export function parseArgs(argv: string[]): ParsedArgs {
     config: opts.config as string | undefined,
     ignoreConfig: opts.ignoreConfig ?? false,
   };
+
+  if (opts.lang) {
+    const lang = opts.lang as string;
+    if (lang !== 'ko' && lang !== 'en') {
+      throw new Error('--lang must be "ko" or "en"');
+    }
+    result.lang = lang;
+  }
 
   if (opts.target) {
     result.target = resolve(opts.target as string);
