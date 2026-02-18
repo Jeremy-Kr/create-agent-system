@@ -27,6 +27,101 @@ function cancelGuard<T>(value: T | symbol): T {
   return value as T;
 }
 
+export async function promptAgentSelection(initial?: AgentName[]): Promise<AgentName[]> {
+  const defaultAgents = initial ?? (AGENT_NAMES as unknown as AgentName[]);
+
+  const selectedAgents = cancelGuard(
+    await clack.multiselect({
+      message: t('custom.enable_agents'),
+      options: AGENT_NAMES.map((name) => ({
+        value: name,
+        label: `${AGENT_DISPLAY_NAMES[name]} — ${getAgentDescription(name)}`,
+      })),
+      initialValues: defaultAgents,
+      required: true,
+    }),
+  ) as AgentName[];
+
+  return selectedAgents;
+}
+
+export async function promptWorkflow(initial?: Partial<WorkflowConfig>): Promise<WorkflowConfig> {
+  const defaults: WorkflowConfig = {
+    reviewMaxRounds: initial?.reviewMaxRounds ?? 0,
+    qaMode: initial?.qaMode ?? 'lite',
+    visualQaLevel: initial?.visualQaLevel ?? 0,
+    epicBased: initial?.epicBased ?? false,
+  };
+
+  const reviewMaxRoundsStr = cancelGuard(
+    await clack.text({
+      message: t('custom.review_rounds'),
+      initialValue: String(defaults.reviewMaxRounds),
+      validate: (v) => {
+        const n = Number(v);
+        if (Number.isNaN(n) || n < 0 || !Number.isInteger(n))
+          return t('custom.review_rounds.invalid');
+      },
+    }),
+  ) as string;
+
+  const qaMode = cancelGuard(
+    await clack.select({
+      message: t('custom.qa_mode'),
+      options: [
+        { value: 'lite', label: t('custom.qa_lite'), hint: t('custom.qa_lite.hint') },
+        { value: 'standard', label: t('custom.qa_standard'), hint: t('custom.qa_standard.hint') },
+      ],
+      initialValue: defaults.qaMode,
+    }),
+  ) as 'lite' | 'standard';
+
+  const visualQaLevel = cancelGuard(
+    await clack.select({
+      message: t('custom.visual_qa'),
+      options: [
+        { value: 0, label: t('custom.visual_none'), hint: t('custom.visual_none.hint') },
+        { value: 1, label: t('custom.visual_spot'), hint: t('custom.visual_spot.hint') },
+        { value: 2, label: t('custom.visual_standard'), hint: t('custom.visual_standard.hint') },
+        { value: 3, label: t('custom.visual_strict'), hint: t('custom.visual_strict.hint') },
+      ],
+      initialValue: defaults.visualQaLevel,
+    }),
+  ) as 0 | 1 | 2 | 3;
+
+  const epicBased = cancelGuard(
+    await clack.confirm({
+      message: t('custom.epic_based'),
+      initialValue: defaults.epicBased,
+    }),
+  ) as boolean;
+
+  return {
+    reviewMaxRounds: Number(reviewMaxRoundsStr),
+    qaMode,
+    visualQaLevel,
+    epicBased,
+  };
+}
+
+export async function promptSkillSelection(initial?: SkillName[]): Promise<SkillName[]> {
+  const defaultSkills = initial ?? [];
+
+  const selectedSkills = cancelGuard(
+    await clack.multiselect({
+      message: t('custom.enable_skills'),
+      options: SKILL_NAMES.map((name) => ({
+        value: name,
+        label: `${name} — ${getSkillDescription(name)}`,
+      })),
+      initialValues: defaultSkills,
+      required: false,
+    }),
+  ) as SkillName[];
+
+  return selectedSkills;
+}
+
 export async function runCustomPresetPrompts(): Promise<Preset> {
   // Step 1: Base preset selection
   const basePresetName = cancelGuard(
@@ -45,19 +140,9 @@ export async function runCustomPresetPrompts(): Promise<Preset> {
   // Step 2: Agent toggle
   const enabledAgentNames = Object.entries(base.agents)
     .filter(([, config]) => config.enabled)
-    .map(([name]) => name);
+    .map(([name]) => name) as AgentName[];
 
-  const selectedAgents = cancelGuard(
-    await clack.multiselect({
-      message: t('custom.enable_agents'),
-      options: AGENT_NAMES.map((name) => ({
-        value: name,
-        label: `${AGENT_DISPLAY_NAMES[name]} — ${getAgentDescription(name)}`,
-      })),
-      initialValues: enabledAgentNames as AgentName[],
-      required: true,
-    }),
-  ) as AgentName[];
+  const selectedAgents = await promptAgentSelection(enabledAgentNames);
 
   const agents = {} as Record<AgentName, AgentConfig>;
   for (const name of AGENT_NAMES) {
@@ -68,68 +153,10 @@ export async function runCustomPresetPrompts(): Promise<Preset> {
   }
 
   // Step 3: Workflow settings
-  const reviewMaxRoundsStr = cancelGuard(
-    await clack.text({
-      message: t('custom.review_rounds'),
-      initialValue: String(base.workflow.reviewMaxRounds),
-      validate: (v) => {
-        const n = Number(v);
-        if (Number.isNaN(n) || n < 0 || !Number.isInteger(n))
-          return t('custom.review_rounds.invalid');
-      },
-    }),
-  ) as string;
-
-  const qaMode = cancelGuard(
-    await clack.select({
-      message: t('custom.qa_mode'),
-      options: [
-        { value: 'lite', label: t('custom.qa_lite'), hint: t('custom.qa_lite.hint') },
-        { value: 'standard', label: t('custom.qa_standard'), hint: t('custom.qa_standard.hint') },
-      ],
-      initialValue: base.workflow.qaMode,
-    }),
-  ) as 'lite' | 'standard';
-
-  const visualQaLevel = cancelGuard(
-    await clack.select({
-      message: t('custom.visual_qa'),
-      options: [
-        { value: 0, label: t('custom.visual_none'), hint: t('custom.visual_none.hint') },
-        { value: 1, label: t('custom.visual_spot'), hint: t('custom.visual_spot.hint') },
-        { value: 2, label: t('custom.visual_standard'), hint: t('custom.visual_standard.hint') },
-        { value: 3, label: t('custom.visual_strict'), hint: t('custom.visual_strict.hint') },
-      ],
-      initialValue: base.workflow.visualQaLevel,
-    }),
-  ) as 0 | 1 | 2 | 3;
-
-  const epicBased = cancelGuard(
-    await clack.confirm({
-      message: t('custom.epic_based'),
-      initialValue: base.workflow.epicBased,
-    }),
-  ) as boolean;
-
-  const workflow: WorkflowConfig = {
-    reviewMaxRounds: Number(reviewMaxRoundsStr),
-    qaMode,
-    visualQaLevel,
-    epicBased,
-  };
+  const workflow = await promptWorkflow(base.workflow);
 
   // Step 4: Skills selection
-  const selectedSkills = cancelGuard(
-    await clack.multiselect({
-      message: t('custom.enable_skills'),
-      options: SKILL_NAMES.map((name) => ({
-        value: name,
-        label: `${name} — ${getSkillDescription(name)}`,
-      })),
-      initialValues: base.skills as SkillName[],
-      required: false,
-    }),
-  ) as SkillName[];
+  const selectedSkills = await promptSkillSelection(base.skills as SkillName[]);
 
   const scale = deriveScale(workflow);
 
