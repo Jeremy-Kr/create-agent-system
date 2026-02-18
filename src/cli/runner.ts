@@ -1,4 +1,6 @@
 import { execFile, spawn } from 'node:child_process';
+import * as clack from '@clack/prompts';
+import { t } from '../i18n/index.js';
 
 export async function isClaudeCodeInstalled(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -11,9 +13,7 @@ export async function isClaudeCodeInstalled(): Promise<boolean> {
 export async function runClaudeCode(targetDir: string): Promise<void> {
   const installed = await isClaudeCodeInstalled();
   if (!installed) {
-    console.log(
-      'Claude Code CLI not found. Install it from https://docs.anthropic.com/en/docs/claude-code and try again.',
-    );
+    clack.log.warn(t('runner.claude_not_found'));
     return;
   }
 
@@ -29,12 +29,13 @@ export async function runClaudeCode(targetDir: string): Promise<void> {
 
     child.on('close', (code) => {
       if (code && code !== 0) {
-        console.log(`Claude Code exited with code ${code}`);
+        clack.log.warn(t('runner.claude_exit_code', { code: String(code) }));
       }
       resolve();
     });
 
-    child.on('error', () => {
+    child.on('error', (err) => {
+      clack.log.warn(err.message);
       resolve();
     });
   });

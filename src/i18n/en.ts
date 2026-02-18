@@ -163,4 +163,9 @@ export const en: Messages = {
   'edit.save_and_scaffold': 'Save and re-scaffold',
   'edit.save_cancel': 'Cancel',
   'edit.saved': 'Configuration saved.',
+
+  // === Runner messages ===
+  'runner.claude_not_found':
+    'Claude Code CLI not found. Install it from https://docs.anthropic.com/en/docs/claude-code and try again.',
+  'runner.claude_exit_code': 'Claude Code exited with code {code}.',
 };

@@ -154,4 +154,8 @@ export interface Messages {
   'edit.save_and_scaffold': string;
   'edit.save_cancel': string;
   'edit.saved': string;
+
+  // === Runner messages ===
+  'runner.claude_not_found': string;
+  'runner.claude_exit_code': string;
 }

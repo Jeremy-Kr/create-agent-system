@@ -180,4 +180,10 @@ export const ko: Messages = {
   'edit.save_and_scaffold': '\uc800\uc7a5 \ud6c4 \uc2a4\uce90\ud3f4\ub529',
   'edit.save_cancel': '\ucde8\uc18c',
   'edit.saved': '\uc124\uc815\uc774 \uc800\uc7a5\ub418\uc5c8\uc2b5\ub2c8\ub2e4.',
+
+  // === Runner \uba54\uc2dc\uc9c0 ===
+  'runner.claude_not_found':
+    'Claude Code CLI\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4. https://docs.anthropic.com/en/docs/claude-code \uc5d0\uc11c \uc124\uce58 \ud6c4 \ub2e4\uc2dc \uc2dc\ub3c4\ud558\uc138\uc694.',
+  'runner.claude_exit_code':
+    'Claude Code\uac00 \uc885\ub8cc \ucf54\ub4dc {code}\ub85c \uc885\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4.',
 };
