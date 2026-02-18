@@ -106,7 +106,7 @@ export async function saveConfigFile(
   language?: Locale,
 ): Promise<string> {
   const configFile: ConfigFile = {
-    version: '0.2',
+    version: '1.0',
     projectName,
     description: preset.description,
     basePreset: basePreset || (preset.name === 'custom' ? undefined : preset.name),
