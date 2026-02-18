@@ -47,8 +47,18 @@ export async function installSkill(
       { cwd: targetDir, timeout: SKILL_TIMEOUT },
       async (error) => {
         if (error) {
-          // Silently copy bundled template as fallback
-          await copyFallbackTemplate(skillName, targetDir).catch(() => {});
+          try {
+            await copyFallbackTemplate(skillName, targetDir);
+          } catch (fallbackError) {
+            const fallbackMsg =
+              fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+            resolve({
+              skillName,
+              success: false,
+              error: `${error.message} (fallback also failed: ${fallbackMsg})`,
+            });
+            return;
+          }
           resolve({ skillName, success: false, error: error.message });
         } else {
           resolve({ skillName, success: true });
