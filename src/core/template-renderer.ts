@@ -6,6 +6,8 @@ import type { AgentName } from '../types/config.js';
 
 const templatesDir = fileURLToPath(new URL('../../templates/', import.meta.url));
 
+const templateCache = new Map<string, ReturnType<typeof Handlebars.compile>>();
+
 export interface AgentTemplateData {
   model: string;
   skills?: string;
@@ -41,14 +43,21 @@ export async function renderTemplate(
   templatePath: string,
   data: Record<string, unknown>,
 ): Promise<string> {
-  let content: string;
-  try {
-    content = await readFile(templatePath, 'utf-8');
-  } catch {
-    throw new Error(`Template not found: ${templatePath}`);
+  let compiled = templateCache.get(templatePath);
+  if (!compiled) {
+    let content: string;
+    try {
+      content = await readFile(templatePath, 'utf-8');
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === 'EACCES') {
+        throw new Error(`Template permission denied: ${templatePath}`);
+      }
+      throw new Error(`Template not found: ${templatePath}`);
+    }
+    compiled = Handlebars.compile(content);
+    templateCache.set(templatePath, compiled);
   }
-
-  const compiled = Handlebars.compile(content);
   return compiled(data);
 }
 
@@ -81,4 +90,8 @@ export async function renderClaudeMdTemplate(data: ClaudeMdTemplateData): Promis
   const templatePath = join(templatesDir, 'claude-md.hbs');
   const headings = data.headings ?? DEFAULT_HEADINGS;
   return renderTemplate(templatePath, { ...data, headings });
+}
+
+export function clearTemplateCache(): void {
+  templateCache.clear();
 }
