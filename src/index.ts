@@ -116,6 +116,26 @@ async function main() {
       process.exit(0);
     }
 
+    if (args.command === 'migrate') {
+      clack.intro(`create-agent-system v${VERSION}`);
+      const { runMigrationFlow } = await import('./cli/migration-prompts.js');
+      await runMigrationFlow(targetDir, {
+        dryRun: args.dryRun,
+        targetVersion: args.targetVersion,
+        yes: args.yes,
+      });
+      clack.outro(t('display.done'));
+      process.exit(0);
+    }
+
+    if (args.command === 'edit') {
+      clack.intro(`create-agent-system v${VERSION}`);
+      const { runEditFlow } = await import('./cli/edit-prompts.js');
+      await runEditFlow(targetDir);
+      clack.outro(t('display.done'));
+      process.exit(0);
+    }
+
     if (args.command === 'add') await handleAdd(args, targetDir);
     if (args.command === 'search') await handleSearch(args);
     if (args.command === 'list') await handleList(args);

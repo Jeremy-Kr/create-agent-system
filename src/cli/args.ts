@@ -7,7 +7,7 @@ import { isRegistryItemType } from '../types/registry.js';
 import { PRESET_NAMES } from '../utils/constants.js';
 
 export interface ParsedArgs {
-  command: 'scaffold' | 'validate' | 'diff' | 'add' | 'search' | 'list';
+  command: 'scaffold' | 'validate' | 'diff' | 'add' | 'search' | 'list' | 'migrate' | 'edit';
   preset?: PresetName;
   projectName?: string;
   target?: string;
@@ -26,6 +26,7 @@ export interface ParsedArgs {
   installed?: boolean;
   quiet?: boolean;
   lang?: Locale;
+  targetVersion?: string;
 }
 
 export function parseArgs(argv: string[]): ParsedArgs {
@@ -68,6 +69,16 @@ export function parseArgs(argv: string[]): ParsedArgs {
   // Handle list subcommand
   if (argv[0] === 'list') {
     return parseListArgs(argv.slice(1));
+  }
+
+  // Handle migrate subcommand
+  if (argv[0] === 'migrate') {
+    return parseMigrateArgs(argv.slice(1));
+  }
+
+  // Handle edit subcommand
+  if (argv[0] === 'edit') {
+    return parseEditArgs(argv.slice(1));
   }
 
   const program = new Command()
@@ -189,5 +200,22 @@ function parseListArgs(args: string[]): ParsedArgs {
     command: 'list',
     registryType: parseRegistryType(args),
     installed: parseFlag(args, '--installed'),
+  };
+}
+
+function parseEditArgs(args: string[]): ParsedArgs {
+  return {
+    command: 'edit',
+    target: parseFlagValue(args, '--target'),
+  };
+}
+
+function parseMigrateArgs(args: string[]): ParsedArgs {
+  return {
+    command: 'migrate',
+    dryRun: parseFlag(args, '--dry-run'),
+    targetVersion: parseFlagValue(args, '--target-version'),
+    yes: parseFlag(args, '--yes') || parseFlag(args, '-y'),
+    target: parseFlagValue(args, '--target'),
   };
 }
