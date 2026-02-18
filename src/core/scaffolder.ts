@@ -186,8 +186,7 @@ export async function scaffold(config: ScaffoldConfig): Promise<ScaffoldResult> 
     }
 
     const rendered = await renderAgentTemplate(agentName, templateData);
-    const existed = await fileExists(filePath);
-    const { skipped } = await writeFileSafe(filePath, rendered, overwrite);
+    const { skipped, existed } = await writeFileSafe(filePath, rendered, overwrite);
     if (skipped) {
       result.files.push({ path: filePath, action: 'skipped' });
     } else {
@@ -202,9 +201,7 @@ export async function scaffold(config: ScaffoldConfig): Promise<ScaffoldResult> 
   } else {
     const claudeMdData = composeClaudeMdData(preset, projectName, techStack);
     const claudeMdContent = await renderClaudeMdTemplate(claudeMdData);
-
-    const existed = await fileExists(claudeMdPath);
-    const { skipped } = await writeFileSafe(claudeMdPath, claudeMdContent, overwrite);
+    const { skipped, existed } = await writeFileSafe(claudeMdPath, claudeMdContent, overwrite);
     if (skipped) {
       result.files.push({ path: claudeMdPath, action: 'skipped' });
       result.warnings.push('CLAUDE.md already exists; skipped (use --overwrite to replace)');

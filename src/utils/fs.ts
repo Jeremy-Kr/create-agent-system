@@ -27,13 +27,12 @@ export async function writeFileSafe(
   filePath: string,
   content: string,
   overwrite?: boolean,
-): Promise<{ written: boolean; skipped: boolean }> {
-  if (await fileExists(filePath)) {
-    if (!overwrite) {
-      return { written: false, skipped: true };
-    }
+): Promise<{ written: boolean; skipped: boolean; existed: boolean }> {
+  const existed = await fileExists(filePath);
+  if (existed && !overwrite) {
+    return { written: false, skipped: true, existed };
   }
   await ensureDir(dirname(filePath));
   await writeFile(filePath, content, 'utf-8');
-  return { written: true, skipped: false };
+  return { written: true, skipped: false, existed };
 }
