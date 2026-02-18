@@ -24,10 +24,10 @@ import { detectSystemLocale } from './i18n/detect.js';
 import { initI18n, t } from './i18n/index.js';
 import type { PresetName, TechStackInfo } from './types/config.js';
 import type { Preset } from './types/preset.js';
-import { PRESET_NAMES } from './utils/constants.js';
+import { PRESET_NAMES, VERSION } from './utils/constants.js';
 import { detectTechStack } from './utils/detect.js';
 
-export const VERSION = '1.0.0';
+export { VERSION };
 
 async function resolvePresetForDiff(nameOrPath: string): Promise<Preset> {
   if ((PRESET_NAMES as readonly string[]).includes(nameOrPath)) {

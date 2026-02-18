@@ -2,6 +2,7 @@ import * as clack from '@clack/prompts';
 import { t } from '../i18n/index.js';
 import type { PresetName, TechStackInfo } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
+import { VERSION } from '../utils/constants.js';
 import type { ParsedArgs } from './args.js';
 
 export interface PromptResult {
@@ -32,7 +33,7 @@ export async function runInteractivePrompts(
   partialArgs: Partial<ParsedArgs>,
   detectedTechStack: TechStackInfo,
 ): Promise<PromptResult> {
-  clack.intro('create-agent-system v0.3.0');
+  clack.intro(`create-agent-system v${VERSION}`);
 
   // Preset selection
   let preset: PresetName;
