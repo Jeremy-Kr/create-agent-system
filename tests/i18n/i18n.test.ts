@@ -3,7 +3,7 @@ import { detectSystemLocale } from '../../src/i18n/detect.js';
 import { en } from '../../src/i18n/en.js';
 import { getLocale, initI18n, t } from '../../src/i18n/index.js';
 import { ko } from '../../src/i18n/ko.js';
-import type { Messages } from '../../src/i18n/types.js';
+import type { Locale, Messages } from '../../src/i18n/types.js';
 
 describe('i18n', () => {
   beforeEach(() => {
@@ -140,6 +140,13 @@ describe('i18n', () => {
       process.env.LANG = 'en_US.UTF-8';
       process.env.LC_ALL = 'ko_KR.UTF-8';
       expect(detectSystemLocale()).toBe('en');
+    });
+  });
+
+  describe('unsupported locale', () => {
+    it('should handle unsupported locale without crashing', () => {
+      // initI18n with an unsupported locale should not throw
+      expect(() => initI18n('fr' as Locale)).not.toThrow();
     });
   });
 

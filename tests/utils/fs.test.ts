@@ -59,7 +59,7 @@ describe('File System Utilities (TICKET-003)', () => {
     it('should write a file and return { written: true, skipped: false }', async () => {
       const filePath = join(tempDir, 'new-file.txt');
       const result = await writeFileSafe(filePath, 'content');
-      expect(result).toEqual({ written: true, skipped: false });
+      expect(result).toEqual({ written: true, skipped: false, existed: false });
 
       const { readFile } = await import('node:fs/promises');
       const content = await readFile(filePath, 'utf-8');
@@ -70,7 +70,7 @@ describe('File System Utilities (TICKET-003)', () => {
       const filePath = join(tempDir, 'existing-file.txt');
       await writeFile(filePath, 'original');
       const result = await writeFileSafe(filePath, 'new content', false);
-      expect(result).toEqual({ written: false, skipped: true });
+      expect(result).toEqual({ written: false, skipped: true, existed: true });
 
       const { readFile } = await import('node:fs/promises');
       const content = await readFile(filePath, 'utf-8');
@@ -81,7 +81,7 @@ describe('File System Utilities (TICKET-003)', () => {
       const filePath = join(tempDir, 'overwrite-file.txt');
       await writeFile(filePath, 'original');
       const result = await writeFileSafe(filePath, 'overwritten', true);
-      expect(result).toEqual({ written: true, skipped: false });
+      expect(result).toEqual({ written: true, skipped: false, existed: true });
 
       const { readFile } = await import('node:fs/promises');
       const content = await readFile(filePath, 'utf-8');
@@ -91,11 +91,31 @@ describe('File System Utilities (TICKET-003)', () => {
     it('should create parent directories if they do not exist', async () => {
       const filePath = join(tempDir, 'nested', 'dir', 'file.txt');
       const result = await writeFileSafe(filePath, 'nested content');
-      expect(result).toEqual({ written: true, skipped: false });
+      expect(result).toEqual({ written: true, skipped: false, existed: false });
 
       const { readFile } = await import('node:fs/promises');
       const content = await readFile(filePath, 'utf-8');
       expect(content).toBe('nested content');
+    });
+
+    it('should return existed: false for new files', async () => {
+      const filePath = join(tempDir, 'brand-new.txt');
+      const result = await writeFileSafe(filePath, 'content');
+      expect(result.existed).toBe(false);
+    });
+
+    it('should return existed: true when file exists and overwritten', async () => {
+      const filePath = join(tempDir, 'existing-for-existed.txt');
+      await writeFile(filePath, 'original');
+      const result = await writeFileSafe(filePath, 'new', true);
+      expect(result.existed).toBe(true);
+    });
+
+    it('should return existed: true when file exists and skipped', async () => {
+      const filePath = join(tempDir, 'existing-for-skip.txt');
+      await writeFile(filePath, 'original');
+      const result = await writeFileSafe(filePath, 'new', false);
+      expect(result.existed).toBe(true);
     });
   });
 });

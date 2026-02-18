@@ -256,4 +256,56 @@ describe('CLI Args (TICKET-014)', () => {
       expect(() => parseArgs(['--yes', '--preset', 'solo-dev'])).not.toThrow();
     });
   });
+
+  describe('--lang option', () => {
+    it('should parse --lang ko', () => {
+      const result = parseArgs(['--lang', 'ko']);
+      expect(result.lang).toBe('ko');
+    });
+
+    it('should parse --lang en', () => {
+      const result = parseArgs(['--lang', 'en']);
+      expect(result.lang).toBe('en');
+    });
+
+    it('should parse -l shorthand', () => {
+      const result = parseArgs(['-l', 'ko']);
+      expect(result.lang).toBe('ko');
+    });
+
+    it('should throw for invalid --lang value', () => {
+      expect(() => parseArgs(['--lang', 'fr'])).toThrow(/--lang must be/);
+    });
+  });
+
+  describe('option combinations', () => {
+    it('should parse --dry-run --save-config --no-run together', () => {
+      const result = parseArgs(['--dry-run', '--save-config', '--no-run']);
+      expect(result.dryRun).toBe(true);
+      expect(result.saveConfig).toBe(true);
+      expect(result.noRun).toBe(true);
+    });
+
+    it('should parse all options combined', () => {
+      const result = parseArgs([
+        '--preset',
+        'solo-dev',
+        '--project-name',
+        'test',
+        '--yes',
+        '--no-run',
+        '--dry-run',
+        '--save-config',
+        '--lang',
+        'ko',
+      ]);
+      expect(result.preset).toBe('solo-dev');
+      expect(result.projectName).toBe('test');
+      expect(result.yes).toBe(true);
+      expect(result.noRun).toBe(true);
+      expect(result.dryRun).toBe(true);
+      expect(result.saveConfig).toBe(true);
+      expect(result.lang).toBe('ko');
+    });
+  });
 });
