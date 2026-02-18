@@ -3,6 +3,7 @@
 import { basename, dirname, resolve } from 'node:path';
 import * as clack from '@clack/prompts';
 import { type ParsedArgs, parseArgs } from './cli/args.js';
+import { cancelGuard } from './cli/clack-utils.js';
 import { displayResults, displayValidationResults, runInteractivePrompts } from './cli/prompts.js';
 import {
   displayInstallResults,
@@ -167,14 +168,12 @@ async function main() {
       clack.log.info(t('display.config_loaded'));
       clack.log.info(`Project: ${projectName}, Base: ${preset.name}`);
 
-      const useConfig = await clack.confirm({
-        message: t('prompt.use_config'),
-        initialValue: true,
-      });
-      if (clack.isCancel(useConfig)) {
-        clack.cancel(t('prompt.cancel'));
-        process.exit(0);
-      }
+      const useConfig = cancelGuard(
+        await clack.confirm({
+          message: t('prompt.use_config'),
+          initialValue: true,
+        }),
+      );
 
       if (!useConfig) {
         ({ preset, projectName, shouldRunClaude, basePresetName } = await resolveFromPrompts(
@@ -184,14 +183,12 @@ async function main() {
       } else {
         // Ask about Claude Code launch
         if (!args.noRun) {
-          const launch = await clack.confirm({
-            message: t('prompt.start_claude'),
-            initialValue: true,
-          });
-          if (clack.isCancel(launch)) {
-            clack.cancel(t('prompt.cancel'));
-            process.exit(0);
-          }
+          const launch = cancelGuard(
+            await clack.confirm({
+              message: t('prompt.start_claude'),
+              initialValue: true,
+            }),
+          );
           shouldRunClaude = launch as boolean;
         }
       }

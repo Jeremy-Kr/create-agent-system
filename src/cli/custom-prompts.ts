@@ -16,16 +16,9 @@ import {
   getSkillDescription,
   SKILL_NAMES,
 } from '../utils/constants.js';
+import { cancelGuard } from './clack-utils.js';
 
 export { deriveScale };
-
-function cancelGuard<T>(value: T | symbol): T {
-  if (clack.isCancel(value)) {
-    clack.cancel(t('prompt.cancel'));
-    process.exit(0);
-  }
-  return value as T;
-}
 
 export async function promptAgentSelection(initial?: AgentName[]): Promise<AgentName[]> {
   const defaultAgents = initial ?? (AGENT_NAMES as unknown as AgentName[]);

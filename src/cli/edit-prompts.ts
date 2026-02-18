@@ -9,17 +9,10 @@ import type { AgentConfig, AgentName, SkillName } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
 import { AGENT_DISPLAY_NAMES, AGENT_NAMES } from '../utils/constants.js';
 import { detectTechStack } from '../utils/detect.js';
+import { cancelGuard } from './clack-utils.js';
 import { promptAgentSelection, promptSkillSelection, promptWorkflow } from './custom-prompts.js';
 
 type EditSection = 'agents' | 'workflow' | 'skills' | 'all';
-
-function cancelGuard<T>(value: T | symbol): T {
-  if (clack.isCancel(value)) {
-    clack.cancel(t('prompt.cancel'));
-    process.exit(0);
-  }
-  return value as T;
-}
 
 function displaySummary(preset: Preset, projectName: string): void {
   clack.log.info(t('edit.current_summary'));
