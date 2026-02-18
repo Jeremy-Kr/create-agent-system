@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "event": "postToolUse",
+      "matcher": { "tool": "Bash", "pattern": "npx create-agent-system(?!.*validate)" },
+      "command": "npx create-agent-system validate --quiet"
+    }
+  ]
+}

@@ -25,7 +25,7 @@ import type { Preset } from './types/preset.js';
 import { PRESET_NAMES } from './utils/constants.js';
 import { detectTechStack } from './utils/detect.js';
 
-export const VERSION = '0.3.0';
+export const VERSION = '0.4.0';
 
 async function resolvePresetForDiff(nameOrPath: string): Promise<Preset> {
   if ((PRESET_NAMES as readonly string[]).includes(nameOrPath)) {
@@ -98,7 +98,9 @@ async function main() {
 
     if (args.command === 'validate') {
       const result = await validate(targetDir);
-      displayValidationResults(result);
+      if (!args.quiet || !result.valid || result.warnings.length > 0) {
+        displayValidationResults(result);
+      }
       process.exit(result.valid ? 0 : 1);
     }
 

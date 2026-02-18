@@ -95,6 +95,30 @@ describe('CLI Args (TICKET-014)', () => {
       expect(result.command).toBe('validate');
       expect(result.target).toBe('/tmp/project');
     });
+
+    it('should parse validate --quiet', () => {
+      const result = parseArgs(['validate', '--quiet']);
+      expect(result.command).toBe('validate');
+      expect(result.quiet).toBe(true);
+    });
+
+    it('should parse validate -q shorthand', () => {
+      const result = parseArgs(['validate', '-q']);
+      expect(result.command).toBe('validate');
+      expect(result.quiet).toBe(true);
+    });
+
+    it('should parse validate with target and --quiet', () => {
+      const result = parseArgs(['validate', '/some/path', '--quiet']);
+      expect(result.command).toBe('validate');
+      expect(result.quiet).toBe(true);
+      expect(result.target).toContain('some/path');
+    });
+
+    it('should default quiet to false for validate', () => {
+      const result = parseArgs(['validate']);
+      expect(result.quiet).toBeFalsy();
+    });
   });
 
   describe('diff subcommand', () => {

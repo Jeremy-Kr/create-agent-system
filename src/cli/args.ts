@@ -23,15 +23,20 @@ export interface ParsedArgs {
   tag?: string;
   force?: boolean;
   installed?: boolean;
+  quiet?: boolean;
 }
 
 export function parseArgs(argv: string[]): ParsedArgs {
   // Handle validate subcommand manually to avoid commander conflicts
   if (argv[0] === 'validate') {
-    const target = argv[1];
+    const rest = argv.slice(1);
+    const quiet = rest.includes('--quiet') || rest.includes('-q');
+    const positional = rest.filter((a) => a !== '--quiet' && a !== '-q');
+    const target = positional[0];
     return {
       command: 'validate',
       target: target ? resolve(target) : undefined,
+      quiet,
     };
   }
 
