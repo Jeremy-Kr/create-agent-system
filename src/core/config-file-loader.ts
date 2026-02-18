@@ -7,6 +7,7 @@ import type { ConfigFile } from '../types/config-file.js';
 import type { Preset } from '../types/preset.js';
 import { AGENT_NAMES, CONFIG_FILE_NAME, SKILL_NAMES } from '../utils/constants.js';
 import { fileExists } from '../utils/fs.js';
+import { isRecord, isStringArray, isValidModel } from '../utils/type-guards.js';
 import { convertWorkflow, deriveScale, type RawWorkflow } from './preset-loader.js';
 
 export function getConfigFilePath(targetDir: string): string {
@@ -39,13 +40,16 @@ export async function loadConfigFile(
 
   let raw: Record<string, unknown>;
   try {
-    raw = parseYaml(content) as Record<string, unknown>;
-  } catch {
-    throw new Error(`Failed to parse config file: malformed YAML`);
-  }
-
-  if (!raw || typeof raw !== 'object') {
-    throw new Error('Failed to parse config file: malformed YAML');
+    const parsed = parseYaml(content);
+    if (!isRecord(parsed)) {
+      throw new Error('Failed to parse config file: malformed YAML (expected an object)');
+    }
+    raw = parsed;
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('Failed to parse config file')) {
+      throw error;
+    }
+    throw new Error('Failed to parse config file: YAML syntax error');
   }
 
   // Validate required fields
@@ -64,13 +68,13 @@ export async function loadConfigFile(
 
   // Validate and build agents
   const agents = {} as Preset['agents'];
-  const rawAgents = raw.agents as Record<string, { enabled: boolean; model: string }>;
+  const rawAgents = isRecord(raw.agents) ? raw.agents : {};
   for (const name of AGENT_NAMES) {
     const agentRaw = rawAgents[name];
-    if (agentRaw) {
+    if (isRecord(agentRaw)) {
       agents[name] = {
         enabled: Boolean(agentRaw.enabled),
-        model: (agentRaw.model as 'opus' | 'sonnet' | 'haiku') || 'opus',
+        model: isValidModel(agentRaw.model) ? agentRaw.model : 'opus',
       };
     } else {
       agents[name] = { enabled: false, model: 'opus' };
@@ -78,7 +82,8 @@ export async function loadConfigFile(
   }
 
   // Validate skills
-  const skills = (raw.skills as string[]).filter((s) =>
+  const rawSkills = isStringArray(raw.skills) ? raw.skills : [];
+  const skills = rawSkills.filter((s) =>
     (SKILL_NAMES as readonly string[]).includes(s),
   ) as SkillName[];
 
