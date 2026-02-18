@@ -1,5 +1,6 @@
 import * as clack from '@clack/prompts';
 import type { PresetName, TechStackInfo } from '../types/config.js';
+import type { Preset } from '../types/preset.js';
 import type { ParsedArgs } from './args.js';
 
 export interface PromptResult {
@@ -7,12 +8,14 @@ export interface PromptResult {
   projectName: string;
   techStack: TechStackInfo;
   shouldRunClaude: boolean;
+  customPreset?: Preset;
 }
 
 const PRESET_OPTIONS = [
   { value: 'solo-dev', label: 'Solo Dev', hint: '1-person, abbreviated workflow' },
   { value: 'small-team', label: 'Small Team', hint: 'standard workflow, EPIC-based' },
   { value: 'full-team', label: 'Full Team', hint: 'full process, Strict QA' },
+  { value: 'custom', label: 'Custom', hint: 'configure agents, workflow, skills' },
 ] as const;
 
 export function isValidProjectName(name: string): boolean {
@@ -26,10 +29,11 @@ export async function runInteractivePrompts(
   partialArgs: Partial<ParsedArgs>,
   detectedTechStack: TechStackInfo,
 ): Promise<PromptResult> {
-  clack.intro('create-agent-system v0.1.0');
+  clack.intro('create-agent-system v0.3.0');
 
   // Preset selection
   let preset: PresetName;
+  let customPreset: Preset | undefined;
   if (partialArgs.preset) {
     preset = partialArgs.preset;
     clack.log.info(`Preset: ${preset}`);
@@ -43,6 +47,12 @@ export async function runInteractivePrompts(
       process.exit(0);
     }
     preset = selected as PresetName;
+  }
+
+  // Custom preset flow
+  if (preset === 'custom') {
+    const { runCustomPresetPrompts } = await import('./custom-prompts.js');
+    customPreset = await runCustomPresetPrompts();
   }
 
   // Project name
@@ -100,7 +110,7 @@ export async function runInteractivePrompts(
     shouldRunClaude = launch as boolean;
   }
 
-  return { preset, projectName, techStack, shouldRunClaude };
+  return { preset, projectName, techStack, shouldRunClaude, customPreset };
 }
 
 export function displayResults(

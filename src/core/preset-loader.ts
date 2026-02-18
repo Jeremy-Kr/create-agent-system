@@ -8,20 +8,30 @@ import { PRESET_NAMES } from '../utils/constants.js';
 
 const presetsDir = fileURLToPath(new URL('../../presets/', import.meta.url));
 
-interface RawWorkflow {
+export interface RawWorkflow {
   review_max_rounds: number;
   qa_mode: 'lite' | 'standard';
   visual_qa_level: 0 | 1 | 2 | 3;
   epic_based: boolean;
 }
 
-function convertWorkflow(raw: RawWorkflow): WorkflowConfig {
+export function convertWorkflow(raw: RawWorkflow): WorkflowConfig {
   return {
     reviewMaxRounds: raw.review_max_rounds,
     qaMode: raw.qa_mode,
     visualQaLevel: raw.visual_qa_level,
     epicBased: raw.epic_based,
   };
+}
+
+export function deriveScale(workflow: WorkflowConfig): 'small' | 'medium' | 'large' {
+  if (workflow.visualQaLevel >= 3 && workflow.qaMode === 'standard') {
+    return 'large';
+  }
+  if (workflow.epicBased || workflow.qaMode === 'standard') {
+    return 'medium';
+  }
+  return 'small';
 }
 
 export function listPresets(): PresetName[] {

@@ -39,6 +39,48 @@ export const SKILLS_DIR = '.claude/skills';
 export const SETTINGS_FILE = '.claude/settings.json';
 export const CLAUDE_MD_FILE = 'CLAUDE.md';
 
+export const CONFIG_FILE_NAME = 'agent-system.config.yaml';
+
+// Registry
+export const DEFAULT_REGISTRY_BASE_URL =
+  'https://raw.githubusercontent.com/create-agent-system/registry/main';
+export const CACHE_DIR_NAME = '.create-agent-system';
+export const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+export const REGISTRY_INDEX_FILE = 'registry.json';
+export const REGISTRY_ENV_VAR = 'CAS_REGISTRY_URL';
+
+export const AGENT_DISPLAY_NAMES: Record<AgentName, string> = {
+  'po-pm': 'PO/PM',
+  architect: 'Architect',
+  cto: 'CTO',
+  designer: 'Designer',
+  'test-writer': 'Test Writer',
+  'frontend-dev': 'Frontend Dev',
+  'backend-dev': 'Backend Dev',
+  'qa-reviewer': 'QA Reviewer',
+};
+
+export const AGENT_DESCRIPTIONS: Record<AgentName, string> = {
+  'po-pm': '스펙/티켓 관리, 변경 요청 처리',
+  architect: '아키텍처 설계, ADR 작성',
+  cto: '기술 검증, 오버엔지니어링 방지',
+  designer: '디자인 시스템, 시각적 QA',
+  'test-writer': 'TDD 기반 테스트 작성',
+  'frontend-dev': '프론트엔드 구현',
+  'backend-dev': '백엔드/CLI/유틸리티 구현',
+  'qa-reviewer': '코드 리뷰, 품질 검증',
+};
+
+export const SKILL_DESCRIPTIONS: Record<SkillName, string> = {
+  scoring: '100점 만점 채점 프로토콜',
+  'visual-qa': '시각적 QA 검증',
+  'tdd-workflow': 'TDD 워크플로우',
+  'adr-writing': 'ADR 작성 가이드',
+  'ticket-writing': '유저 스토리 기반 티켓 작성',
+  'design-system': '디자인 시스템 관리',
+  'cr-process': '변경 요청 프로세스',
+};
+
 export const AGENT_DEFAULT_SKILLS: Record<AgentName, SkillName[]> = {
   'po-pm': ['scoring', 'ticket-writing', 'cr-process'],
   architect: ['scoring', 'adr-writing'],

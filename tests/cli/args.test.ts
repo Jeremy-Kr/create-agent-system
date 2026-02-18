@@ -97,6 +97,132 @@ describe('CLI Args (TICKET-014)', () => {
     });
   });
 
+  describe('diff subcommand', () => {
+    it('should parse diff command with two presets', () => {
+      const result = parseArgs(['diff', 'solo-dev', 'full-team']);
+      expect(result.command).toBe('diff');
+      expect(result.diffArgs).toEqual(['solo-dev', 'full-team']);
+    });
+
+    it('should throw when diff has no arguments', () => {
+      expect(() => parseArgs(['diff'])).toThrow(/Usage.*diff/);
+    });
+
+    it('should throw when diff has only one argument', () => {
+      expect(() => parseArgs(['diff', 'solo-dev'])).toThrow(/Usage.*diff/);
+    });
+  });
+
+  describe('v0.2.0 options', () => {
+    it('should parse --save-config', () => {
+      const result = parseArgs(['--save-config']);
+      expect(result.saveConfig).toBe(true);
+    });
+
+    it('should parse --config', () => {
+      const result = parseArgs(['--config', '/path/to/config.yaml']);
+      expect(result.config).toBe('/path/to/config.yaml');
+    });
+
+    it('should parse --ignore-config', () => {
+      const result = parseArgs(['--ignore-config']);
+      expect(result.ignoreConfig).toBe(true);
+    });
+
+    it('should default new flags to false/undefined', () => {
+      const result = parseArgs([]);
+      expect(result.saveConfig).toBeFalsy();
+      expect(result.config).toBeUndefined();
+      expect(result.ignoreConfig).toBeFalsy();
+    });
+  });
+
+  describe('add subcommand (v0.3.0)', () => {
+    it('should parse add with single name', () => {
+      const result = parseArgs(['add', 'devops-engineer']);
+      expect(result.command).toBe('add');
+      expect(result.addNames).toEqual(['devops-engineer']);
+    });
+
+    it('should parse add with multiple names', () => {
+      const result = parseArgs(['add', 'devops-engineer', 'security-reviewer']);
+      expect(result.command).toBe('add');
+      expect(result.addNames).toEqual(['devops-engineer', 'security-reviewer']);
+    });
+
+    it('should parse add with --type', () => {
+      const result = parseArgs(['add', 'devops-engineer', '--type', 'agent']);
+      expect(result.registryType).toBe('agent');
+    });
+
+    it('should parse add with --force', () => {
+      const result = parseArgs(['add', 'devops-engineer', '--force']);
+      expect(result.force).toBe(true);
+    });
+
+    it('should parse add with --yes', () => {
+      const result = parseArgs(['add', 'devops-engineer', '--yes']);
+      expect(result.yes).toBe(true);
+    });
+
+    it('should parse add with -y shorthand', () => {
+      const result = parseArgs(['add', 'devops-engineer', '-y']);
+      expect(result.yes).toBe(true);
+    });
+
+    it('should throw when add has no names', () => {
+      expect(() => parseArgs(['add'])).toThrow(/Usage.*add/);
+    });
+
+    it('should throw for invalid --type value', () => {
+      expect(() => parseArgs(['add', 'foo', '--type', 'invalid'])).toThrow(/Invalid --type/);
+    });
+  });
+
+  describe('search subcommand (v0.3.0)', () => {
+    it('should parse search with query', () => {
+      const result = parseArgs(['search', 'devops']);
+      expect(result.command).toBe('search');
+      expect(result.searchQuery).toBe('devops');
+    });
+
+    it('should parse search with --type', () => {
+      const result = parseArgs(['search', 'devops', '--type', 'agent']);
+      expect(result.registryType).toBe('agent');
+    });
+
+    it('should parse search with --tag', () => {
+      const result = parseArgs(['search', 'devops', '--tag', 'ci-cd']);
+      expect(result.tag).toBe('ci-cd');
+    });
+
+    it('should join multi-word search query', () => {
+      const result = parseArgs(['search', 'api', 'design']);
+      expect(result.searchQuery).toBe('api design');
+    });
+
+    it('should throw when search has no query', () => {
+      expect(() => parseArgs(['search'])).toThrow(/Usage.*search/);
+    });
+  });
+
+  describe('list subcommand (v0.3.0)', () => {
+    it('should parse list with no options', () => {
+      const result = parseArgs(['list']);
+      expect(result.command).toBe('list');
+    });
+
+    it('should parse list with --type', () => {
+      const result = parseArgs(['list', '--type', 'skill']);
+      expect(result.registryType).toBe('skill');
+    });
+
+    it('should parse list with --installed', () => {
+      const result = parseArgs(['list', '--installed']);
+      expect(result.installed).toBe(true);
+    });
+  });
+
   describe('validation', () => {
     it('should throw when --yes is used without --preset', () => {
       expect(() => parseArgs(['--yes'])).toThrow(/--yes requires --preset/);
