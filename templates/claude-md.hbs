@@ -1,29 +1,29 @@
-# Project Memory
+# {{headings.projectMemory}}
 
-## Project Overview
+## {{headings.projectOverview}}
 - {{projectName}}{{#if projectDescription}}: {{projectDescription}}{{/if}}
 {{#if specPath}}- Spec: @{{specPath}}{{/if}}
 {{#if adrPath}}- ADR: @{{adrPath}}{{/if}}
 
-## Common Rules
+## {{headings.commonRules}}
 - All work starts in plan mode
 - Do not modify finalized specs without a CR (Change Request)
 - All feedback must be scored on a 100-point scale (1-point increments) with specific deduction reasons
 {{#if visualQa}}- Visual QA is performed at the designated Level (default: Level {{visualQaLevel}}){{/if}}
 
-## Build & Test Commands
+## {{headings.buildCommands}}
 - `{{packageManager}} dev` — Dev server
 - `{{packageManager}} test` — Unit tests
 - `{{packageManager}} test:e2e` — E2E tests
 - `{{packageManager}} lint` — Lint
 
-## Code Style
+## {{headings.codeStyle}}
 - TypeScript strict mode
 - Functional components + hooks
 - Named exports preferred
 - 2-space indentation
 
-## Agent Context Rules
+## {{headings.agentContextRules}}
 
 Each agent follows this table.
 
@@ -33,9 +33,9 @@ Each agent follows this table.
 | {{this.displayName}} | {{this.alwaysRead}} | {{this.onDemand}} | {{this.exclude}} |
 {{/each}}
 
-## File Ownership
+## {{headings.fileOwnership}}
 
-### Exclusive Ownership
+### {{headings.exclusiveOwnership}}
 
 | Directory/File | Owner Agent |
 |---------------|-------------|
@@ -43,24 +43,24 @@ Each agent follows this table.
 | `{{this.path}}` | {{this.owner}} |
 {{/each}}
 
-### Shared File Rules
+### {{headings.sharedFileRules}}
 
 | File | Write Access | Read Access | Change Protocol |
 |------|-------------|-------------|-----------------|
 | `src/types/shared.ts` | backend-dev | frontend-dev (read-only) | BE notifies FE via mailbox after changes |
 | `src/utils/common.ts` | Orchestrator only | All | Agents request changes via Orchestrator |
 
-## Failure Modes & Recovery
+## {{headings.failureModes}}
 
-### Detection Criteria
+### {{headings.detectionCriteria}}
 - Score below 60: Immediate failure declaration
 - Score 60-69: One revision opportunity, failure if below 70 on re-score
 
-### Escalation Rules
+### {{headings.escalationRules}}
 - 2 consecutive failures on same task: Orchestrator escalates to Human
 
 {{#if epicBased}}
-## EPIC Dependency Management
+## {{headings.epicDependency}}
 
 Orchestrator manages EPIC execution order and dependencies.
 1. Execute EPICs with no dependencies first
@@ -68,5 +68,5 @@ Orchestrator manages EPIC execution order and dependencies.
 3. Independent EPICs may run in parallel
 {{/if}}
 
-## Model Configuration
+## {{headings.modelConfig}}
 All agents currently use Opus.

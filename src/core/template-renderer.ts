@@ -34,6 +34,7 @@ export interface ClaudeMdTemplateData {
     path: string;
     owner: string;
   }>;
+  headings?: Record<string, string>;
 }
 
 export async function renderTemplate(
@@ -59,7 +60,25 @@ export async function renderAgentTemplate(
   return renderTemplate(templatePath, { ...data });
 }
 
+const DEFAULT_HEADINGS: Record<string, string> = {
+  projectMemory: 'Project Memory',
+  projectOverview: 'Project Overview',
+  commonRules: 'Common Rules',
+  buildCommands: 'Build & Test Commands',
+  codeStyle: 'Code Style',
+  agentContextRules: 'Agent Context Rules',
+  fileOwnership: 'File Ownership',
+  exclusiveOwnership: 'Exclusive Ownership',
+  sharedFileRules: 'Shared File Rules',
+  failureModes: 'Failure Modes & Recovery',
+  detectionCriteria: 'Detection Criteria',
+  escalationRules: 'Escalation Rules',
+  epicDependency: 'EPIC Dependency Management',
+  modelConfig: 'Model Configuration',
+};
+
 export async function renderClaudeMdTemplate(data: ClaudeMdTemplateData): Promise<string> {
   const templatePath = join(templatesDir, 'claude-md.hbs');
-  return renderTemplate(templatePath, { ...data });
+  const headings = data.headings ?? DEFAULT_HEADINGS;
+  return renderTemplate(templatePath, { ...data, headings });
 }

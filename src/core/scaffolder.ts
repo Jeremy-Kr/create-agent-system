@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { t } from '../i18n/index.js';
 import type { AgentName, SkillName, TechStackInfo } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
 import {
@@ -140,6 +141,22 @@ export function composeClaudeMdData(
     epicBased: preset.workflow.epicBased,
     activeAgents: enabledAgents.map((name) => AGENT_CONTEXT_RULES[name]),
     fileOwnership: FILE_OWNERSHIP,
+    headings: {
+      projectMemory: t('heading.project_memory'),
+      projectOverview: t('heading.project_overview'),
+      commonRules: t('heading.common_rules'),
+      buildCommands: t('heading.build_commands'),
+      codeStyle: t('heading.code_style'),
+      agentContextRules: t('heading.agent_context_rules'),
+      fileOwnership: t('heading.file_ownership'),
+      exclusiveOwnership: t('heading.exclusive_ownership'),
+      sharedFileRules: t('heading.shared_file_rules'),
+      failureModes: t('heading.failure_modes'),
+      detectionCriteria: t('heading.detection_criteria'),
+      escalationRules: t('heading.escalation_rules'),
+      epicDependency: t('heading.epic_dependency'),
+      modelConfig: t('heading.model_config'),
+    },
   };
 }
 
