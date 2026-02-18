@@ -78,8 +78,11 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
   // Scan skill directories
   if (await dirExists(skillsDir)) {
     const skillDirs = await readdir(skillsDir);
-    for (const dir of skillDirs) {
-      if (await fileExists(join(skillsDir, dir, 'SKILL.md'))) {
+    const skillChecks = await Promise.all(
+      skillDirs.map((dir) => fileExists(join(skillsDir, dir, 'SKILL.md'))),
+    );
+    for (const exists of skillChecks) {
+      if (exists) {
         skillCount++;
         fileCount++;
       }
@@ -90,11 +93,16 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
   fileCount++;
 
   // Validate each agent file
-  for (const agentFile of agentFiles) {
-    const filePath = join(agentsDir, agentFile);
-    const relPath = relative(targetDir, filePath);
-    const content = await readFile(filePath, 'utf-8');
+  const agentContents = await Promise.all(
+    agentFiles.map(async (agentFile) => {
+      const filePath = join(agentsDir, agentFile);
+      const relPath = relative(targetDir, filePath);
+      const content = await readFile(filePath, 'utf-8');
+      return { agentFile, filePath, relPath, content };
+    }),
+  );
 
+  for (const { relPath, content } of agentContents) {
     // Parse frontmatter
     let parsed: ReturnType<typeof parseFrontmatter>;
     try {
