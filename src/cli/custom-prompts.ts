@@ -1,7 +1,6 @@
 import * as clack from '@clack/prompts';
 import { deriveScale, loadPreset } from '../core/preset-loader.js';
 import { t } from '../i18n/index.js';
-import type { Messages } from '../i18n/types.js';
 import type {
   AgentConfig,
   AgentName,
@@ -10,7 +9,13 @@ import type {
   WorkflowConfig,
 } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
-import { AGENT_DISPLAY_NAMES, AGENT_NAMES, SKILL_NAMES } from '../utils/constants.js';
+import {
+  AGENT_DISPLAY_NAMES,
+  AGENT_NAMES,
+  getAgentDescription,
+  getSkillDescription,
+  SKILL_NAMES,
+} from '../utils/constants.js';
 
 export { deriveScale };
 
@@ -20,16 +25,6 @@ function cancelGuard<T>(value: T | symbol): T {
     process.exit(0);
   }
   return value as T;
-}
-
-function getAgentDescription(name: AgentName): string {
-  const key = `agent.${name.replace(/-/g, '_')}` as keyof Messages;
-  return t(key);
-}
-
-function getSkillDescription(name: SkillName): string {
-  const key = `skill.${name.replace(/-/g, '_')}` as keyof Messages;
-  return t(key);
 }
 
 export async function runCustomPresetPrompts(): Promise<Preset> {

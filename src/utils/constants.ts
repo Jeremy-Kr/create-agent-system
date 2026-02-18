@@ -1,3 +1,5 @@
+import { t } from '../i18n/index.js';
+import type { Messages } from '../i18n/types.js';
 import type { AgentName, SkillName } from '../types/config.js';
 
 export const AGENT_NAMES: readonly AgentName[] = [
@@ -80,6 +82,16 @@ export const SKILL_DESCRIPTIONS: Record<SkillName, string> = {
   'design-system': '디자인 시스템 관리',
   'cr-process': '변경 요청 프로세스',
 };
+
+export function getAgentDescription(name: AgentName): string {
+  const key = `agent.${name.replace(/-/g, '_')}` as keyof Messages;
+  return t(key);
+}
+
+export function getSkillDescription(name: SkillName): string {
+  const key = `skill.${name.replace(/-/g, '_')}` as keyof Messages;
+  return t(key);
+}
 
 export const AGENT_DEFAULT_SKILLS: Record<AgentName, SkillName[]> = {
   'po-pm': ['scoring', 'ticket-writing', 'cr-process'],
