@@ -1,5 +1,7 @@
 import * as clack from '@clack/prompts';
 import { deriveScale, loadPreset } from '../core/preset-loader.js';
+import { t } from '../i18n/index.js';
+import type { Messages } from '../i18n/types.js';
 import type {
   AgentConfig,
   AgentName,
@@ -8,33 +10,37 @@ import type {
   WorkflowConfig,
 } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
-import {
-  AGENT_DESCRIPTIONS,
-  AGENT_DISPLAY_NAMES,
-  AGENT_NAMES,
-  SKILL_DESCRIPTIONS,
-  SKILL_NAMES,
-} from '../utils/constants.js';
+import { AGENT_DISPLAY_NAMES, AGENT_NAMES, SKILL_NAMES } from '../utils/constants.js';
 
 export { deriveScale };
 
 function cancelGuard<T>(value: T | symbol): T {
   if (clack.isCancel(value)) {
-    clack.cancel('Operation cancelled.');
+    clack.cancel(t('prompt.cancel'));
     process.exit(0);
   }
   return value as T;
+}
+
+function getAgentDescription(name: AgentName): string {
+  const key = `agent.${name.replace(/-/g, '_')}` as keyof Messages;
+  return t(key);
+}
+
+function getSkillDescription(name: SkillName): string {
+  const key = `skill.${name.replace(/-/g, '_')}` as keyof Messages;
+  return t(key);
 }
 
 export async function runCustomPresetPrompts(): Promise<Preset> {
   // Step 1: Base preset selection
   const basePresetName = cancelGuard(
     await clack.select({
-      message: 'Base preset to start from:',
+      message: t('custom.base_preset'),
       options: [
-        { value: 'solo-dev', label: 'Solo Dev', hint: 'minimal, 5 agents' },
-        { value: 'small-team', label: 'Small Team', hint: 'standard, 8 agents' },
-        { value: 'full-team', label: 'Full Team', hint: 'full process, strict QA' },
+        { value: 'solo-dev', label: `${t('preset.solo_dev')}`, hint: `minimal, 5 agents` },
+        { value: 'small-team', label: `${t('preset.small_team')}`, hint: `standard, 8 agents` },
+        { value: 'full-team', label: `${t('preset.full_team')}`, hint: `full process, strict QA` },
       ],
     }),
   ) as PresetName;
@@ -48,10 +54,10 @@ export async function runCustomPresetPrompts(): Promise<Preset> {
 
   const selectedAgents = cancelGuard(
     await clack.multiselect({
-      message: 'Enable agents:',
+      message: t('custom.enable_agents'),
       options: AGENT_NAMES.map((name) => ({
         value: name,
-        label: `${AGENT_DISPLAY_NAMES[name]} — ${AGENT_DESCRIPTIONS[name]}`,
+        label: `${AGENT_DISPLAY_NAMES[name]} — ${getAgentDescription(name)}`,
       })),
       initialValues: enabledAgentNames as AgentName[],
       required: true,
@@ -69,22 +75,22 @@ export async function runCustomPresetPrompts(): Promise<Preset> {
   // Step 3: Workflow settings
   const reviewMaxRoundsStr = cancelGuard(
     await clack.text({
-      message: 'Max review rounds (0 = skip):',
+      message: t('custom.review_rounds'),
       initialValue: String(base.workflow.reviewMaxRounds),
       validate: (v) => {
         const n = Number(v);
         if (Number.isNaN(n) || n < 0 || !Number.isInteger(n))
-          return 'Enter a non-negative integer.';
+          return t('custom.review_rounds.invalid');
       },
     }),
   ) as string;
 
   const qaMode = cancelGuard(
     await clack.select({
-      message: 'QA mode:',
+      message: t('custom.qa_mode'),
       options: [
-        { value: 'lite', label: 'Lite', hint: 'unit tests + code review only' },
-        { value: 'standard', label: 'Standard', hint: 'full QA with E2E' },
+        { value: 'lite', label: t('custom.qa_lite'), hint: t('custom.qa_lite.hint') },
+        { value: 'standard', label: t('custom.qa_standard'), hint: t('custom.qa_standard.hint') },
       ],
       initialValue: base.workflow.qaMode,
     }),
@@ -92,12 +98,12 @@ export async function runCustomPresetPrompts(): Promise<Preset> {
 
   const visualQaLevel = cancelGuard(
     await clack.select({
-      message: 'Visual QA level:',
+      message: t('custom.visual_qa'),
       options: [
-        { value: 0, label: 'None', hint: 'no visual checks' },
-        { value: 1, label: 'Spot Check', hint: 'basic visual validation' },
-        { value: 2, label: 'Standard', hint: 'thorough visual QA' },
-        { value: 3, label: 'Strict', hint: 'pixel-level checks' },
+        { value: 0, label: t('custom.visual_none'), hint: t('custom.visual_none.hint') },
+        { value: 1, label: t('custom.visual_spot'), hint: t('custom.visual_spot.hint') },
+        { value: 2, label: t('custom.visual_standard'), hint: t('custom.visual_standard.hint') },
+        { value: 3, label: t('custom.visual_strict'), hint: t('custom.visual_strict.hint') },
       ],
       initialValue: base.workflow.visualQaLevel,
     }),
@@ -105,7 +111,7 @@ export async function runCustomPresetPrompts(): Promise<Preset> {
 
   const epicBased = cancelGuard(
     await clack.confirm({
-      message: 'Use EPIC-based development?',
+      message: t('custom.epic_based'),
       initialValue: base.workflow.epicBased,
     }),
   ) as boolean;
@@ -120,10 +126,10 @@ export async function runCustomPresetPrompts(): Promise<Preset> {
   // Step 4: Skills selection
   const selectedSkills = cancelGuard(
     await clack.multiselect({
-      message: 'Enable skills:',
+      message: t('custom.enable_skills'),
       options: SKILL_NAMES.map((name) => ({
         value: name,
-        label: `${name} — ${SKILL_DESCRIPTIONS[name]}`,
+        label: `${name} — ${getSkillDescription(name)}`,
       })),
       initialValues: base.skills as SkillName[],
       required: false,

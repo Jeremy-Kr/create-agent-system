@@ -1,4 +1,5 @@
 import * as clack from '@clack/prompts';
+import { t } from '../i18n/index.js';
 import type { SkillName } from '../types/config.js';
 import type { AgentDiff, PresetDiffResult, SkillDiff, WorkflowDiff } from '../types/diff.js';
 import type { Preset } from '../types/preset.js';
@@ -48,48 +49,48 @@ export function diffPresets(presetA: Preset, presetB: Preset): PresetDiffResult 
 }
 
 export function displayDiff(diff: PresetDiffResult): void {
-  clack.log.info(`Comparing: ${diff.nameA} ↔ ${diff.nameB}`);
+  clack.log.info(t('differ.comparing', { a: diff.nameA, b: diff.nameB }));
 
   if (diff.scaleChanged) {
-    clack.log.step(`Scale: ${diff.scaleA} → ${diff.scaleB}`);
+    clack.log.step(t('differ.scale', { a: diff.scaleA ?? '', b: diff.scaleB ?? '' }));
   }
 
   // Agents
   if (diff.agents.length > 0) {
-    clack.log.step('Agents:');
+    clack.log.step(t('differ.agents'));
     for (const d of diff.agents) {
       const name = AGENT_DISPLAY_NAMES[d.agent] || d.agent;
       clack.log.message(`  ${name}.${d.field}: ${String(d.a)} → ${String(d.b)}`);
     }
   } else {
-    clack.log.step('Agents: identical');
+    clack.log.step(t('differ.agents_identical'));
   }
 
   // Workflow
   if (diff.workflow.length > 0) {
-    clack.log.step('Workflow:');
+    clack.log.step(t('differ.workflow'));
     for (const d of diff.workflow) {
       clack.log.message(`  ${d.field}: ${String(d.a)} → ${String(d.b)}`);
     }
   } else {
-    clack.log.step('Workflow: identical');
+    clack.log.step(t('differ.workflow_identical'));
   }
 
   // Skills
   const hasSkillDiff = diff.skills.onlyInA.length > 0 || diff.skills.onlyInB.length > 0;
   if (hasSkillDiff) {
-    clack.log.step('Skills:');
+    clack.log.step(t('differ.skills'));
     for (const s of diff.skills.onlyInA) {
-      clack.log.message(`  - ${s} (only in ${diff.nameA})`);
+      clack.log.message(`  - ${t('differ.only_in', { skill: s, preset: diff.nameA })}`);
     }
     for (const s of diff.skills.onlyInB) {
-      clack.log.message(`  + ${s} (only in ${diff.nameB})`);
+      clack.log.message(`  + ${t('differ.only_in', { skill: s, preset: diff.nameB })}`);
     }
     if (diff.skills.common.length > 0) {
-      clack.log.message(`  = ${diff.skills.common.join(', ')} (common)`);
+      clack.log.message(`  = ${t('differ.common', { skills: diff.skills.common.join(', ') })}`);
     }
   } else {
-    clack.log.step('Skills: identical');
+    clack.log.step(t('differ.skills_identical'));
   }
 
   // Summary
@@ -101,8 +102,8 @@ export function displayDiff(diff: PresetDiffResult): void {
     (diff.scaleChanged ? 1 : 0);
 
   if (totalChanges === 0) {
-    clack.log.success('No differences found.');
+    clack.log.success(t('display.no_differences'));
   } else {
-    clack.log.info(`${totalChanges} difference(s) found.`);
+    clack.log.info(t('display.differences_count', { count: totalChanges }));
   }
 }

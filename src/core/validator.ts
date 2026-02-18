@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { parse as parseYaml } from 'yaml';
+import { t } from '../i18n/index.js';
 import { SUPPORTED_FRONTMATTER_FIELDS, VALID_MODEL_VALUES } from '../utils/constants.js';
 import { dirExists, fileExists } from '../utils/fs.js';
 
@@ -47,7 +48,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
     errors.push({
       rule: 'STRUCTURE',
       file: '.claude/agents/',
-      message: "Agent directory .claude/agents/ not found. Run 'create-agent-system' to scaffold.",
+      message: t('validator.missing_agents_dir'),
     });
   }
 
@@ -55,7 +56,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
     errors.push({
       rule: 'STRUCTURE',
       file: 'CLAUDE.md',
-      message: "CLAUDE.md not found in project root. Run 'create-agent-system' to scaffold.",
+      message: t('validator.missing_claude_md'),
     });
   }
 
@@ -102,7 +103,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       errors.push({
         rule: 'YAML_PARSE_ERROR',
         file: relPath,
-        message: `Failed to parse YAML frontmatter in ${relPath}`,
+        message: t('validator.yaml_parse_error', { file: relPath }),
       });
       continue;
     }
@@ -111,7 +112,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       errors.push({
         rule: 'YAML_PARSE_ERROR',
         file: relPath,
-        message: `Failed to parse YAML frontmatter in ${relPath}: no frontmatter delimiters found`,
+        message: t('validator.yaml_no_frontmatter', { file: relPath }),
       });
       continue;
     }
@@ -123,7 +124,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       errors.push({
         rule: 'MISSING_NAME',
         file: relPath,
-        message: `Missing required field 'name' in ${relPath}`,
+        message: t('validator.missing_name', { file: relPath }),
       });
     }
 
@@ -132,7 +133,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       errors.push({
         rule: 'MISSING_DESCRIPTION',
         file: relPath,
-        message: `Missing required field 'description' in ${relPath}`,
+        message: t('validator.missing_description', { file: relPath }),
       });
     }
 
@@ -142,7 +143,11 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
         errors.push({
           rule: 'UNSUPPORTED_FIELD',
           file: relPath,
-          message: `Unsupported frontmatter field '${key}' in ${relPath}. Supported fields: ${SUPPORTED_FRONTMATTER_FIELDS.join(', ')}`,
+          message: t('validator.unsupported_field', {
+            file: relPath,
+            field: key,
+            supported: SUPPORTED_FRONTMATTER_FIELDS.join(', '),
+          }),
         });
       }
     }
@@ -152,7 +157,11 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       errors.push({
         rule: 'INVALID_MODEL',
         file: relPath,
-        message: `Invalid model value '${data.model}' in ${relPath}. Valid values: ${VALID_MODEL_VALUES.join(', ')}`,
+        message: t('validator.invalid_model', {
+          file: relPath,
+          model: String(data.model),
+          valid: VALID_MODEL_VALUES.join(', '),
+        }),
       });
     }
 
@@ -166,7 +175,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
           errors.push({
             rule: 'INVALID_SKILL_REFERENCE',
             file: relPath,
-            message: `Skill '${skillName}' referenced in ${relPath} but .claude/skills/${skillName}/SKILL.md does not exist`,
+            message: t('validator.invalid_skill_ref', { file: relPath, skill: skillName }),
           });
         }
       }
@@ -178,7 +187,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       warnings.push({
         rule: 'SHORT_DESCRIPTION',
         file: relPath,
-        message: `Description in ${relPath} is very short (${desc.length} chars). Consider adding more detail (recommended: 20+ chars)`,
+        message: t('validator.short_description', { file: relPath, length: desc.length }),
       });
     }
 
@@ -187,7 +196,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       warnings.push({
         rule: 'LONG_DESCRIPTION',
         file: relPath,
-        message: `Description in ${relPath} is very long (${desc.length} chars). Consider shortening (recommended: under 1024 chars)`,
+        message: t('validator.long_description', { file: relPath, length: desc.length }),
       });
     }
 
@@ -196,7 +205,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       warnings.push({
         rule: 'MISSING_TOOLS',
         file: relPath,
-        message: `No 'tools' field in ${relPath}. All tools will be inherited. If intentional, this is fine.`,
+        message: t('validator.missing_tools', { file: relPath }),
       });
     }
 
@@ -206,7 +215,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
         warnings.push({
           rule: 'DUPLICATE_CONTENT',
           file: relPath,
-          message: `Agent definition ${relPath} appears to contain '${keyword}' which should be in CLAUDE.md only (SSOT principle)`,
+          message: t('validator.duplicate_content', { file: relPath, keyword }),
         });
         break; // One warning per file
       }
@@ -221,7 +230,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       errors.push({
         rule: 'INVALID_IMPORT_PATH',
         file: 'CLAUDE.md',
-        message: `Import path '@${importPath}' in CLAUDE.md references nonexistent file`,
+        message: t('validator.invalid_import', { path: importPath }),
       });
     }
   }

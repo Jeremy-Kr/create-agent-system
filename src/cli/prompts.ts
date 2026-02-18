@@ -1,4 +1,5 @@
 import * as clack from '@clack/prompts';
+import { t } from '../i18n/index.js';
 import type { PresetName, TechStackInfo } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
 import type { ParsedArgs } from './args.js';
@@ -11,12 +12,14 @@ export interface PromptResult {
   customPreset?: Preset;
 }
 
-const PRESET_OPTIONS = [
-  { value: 'solo-dev', label: 'Solo Dev', hint: '1-person, abbreviated workflow' },
-  { value: 'small-team', label: 'Small Team', hint: 'standard workflow, EPIC-based' },
-  { value: 'full-team', label: 'Full Team', hint: 'full process, Strict QA' },
-  { value: 'custom', label: 'Custom', hint: 'configure agents, workflow, skills' },
-] as const;
+function getPresetOptions() {
+  return [
+    { value: 'solo-dev', label: `${t('preset.solo_dev')} — ${t('preset.solo_dev.hint')}` },
+    { value: 'small-team', label: `${t('preset.small_team')} — ${t('preset.small_team.hint')}` },
+    { value: 'full-team', label: `${t('preset.full_team')} — ${t('preset.full_team.hint')}` },
+    { value: 'custom', label: `${t('preset.custom')} — ${t('preset.custom.hint')}` },
+  ] as const;
+}
 
 export function isValidProjectName(name: string): boolean {
   if (!name) return false;
@@ -39,11 +42,11 @@ export async function runInteractivePrompts(
     clack.log.info(`Preset: ${preset}`);
   } else {
     const selected = await clack.select({
-      message: 'Choose a preset:',
-      options: PRESET_OPTIONS.map((o) => ({ value: o.value, label: `${o.label} — ${o.hint}` })),
+      message: t('prompt.choose_preset'),
+      options: [...getPresetOptions()],
     });
     if (clack.isCancel(selected)) {
-      clack.cancel('Operation cancelled.');
+      clack.cancel(t('prompt.cancel'));
       process.exit(0);
     }
     preset = selected as PresetName;
@@ -62,16 +65,16 @@ export async function runInteractivePrompts(
     clack.log.info(`Project: ${projectName}`);
   } else {
     const name = await clack.text({
-      message: 'Project name:',
-      placeholder: 'my-project',
+      message: t('prompt.project_name'),
+      placeholder: t('prompt.project_name.placeholder'),
       validate: (value: string | undefined) => {
         if (!value || !isValidProjectName(value)) {
-          return 'Invalid name. Use lowercase, hyphens, no spaces.';
+          return t('prompt.project_name.invalid');
         }
       },
     });
     if (clack.isCancel(name)) {
-      clack.cancel('Operation cancelled.');
+      clack.cancel(t('prompt.cancel'));
       process.exit(0);
     }
     projectName = name as string;
@@ -87,11 +90,11 @@ export async function runInteractivePrompts(
       detectedTechStack.packageManager,
     ].filter(Boolean);
     const confirmed = await clack.confirm({
-      message: `Detected: ${parts.join(' + ')}. Correct?`,
+      message: t('prompt.tech_stack_confirm', { stack: parts.join(' + ') }),
       initialValue: true,
     });
     if (clack.isCancel(confirmed)) {
-      clack.cancel('Operation cancelled.');
+      clack.cancel(t('prompt.cancel'));
       process.exit(0);
     }
   }
@@ -100,11 +103,11 @@ export async function runInteractivePrompts(
   let shouldRunClaude = false;
   if (!partialArgs.noRun) {
     const launch = await clack.confirm({
-      message: 'Start Claude Code in plan mode?',
+      message: t('prompt.start_claude'),
       initialValue: true,
     });
     if (clack.isCancel(launch)) {
-      clack.cancel('Operation cancelled.');
+      clack.cancel(t('prompt.cancel'));
       process.exit(0);
     }
     shouldRunClaude = launch as boolean;
@@ -117,13 +120,13 @@ export function displayResults(
   files: Array<{ path: string; action: string }>,
   warnings: string[],
 ): void {
-  clack.log.success('Scaffolding complete!');
+  clack.log.success(t('display.scaffolding_complete'));
 
   for (const file of files) {
     if (file.action === 'created' || file.action === 'overwritten') {
-      clack.log.info(`  + ${file.path}`);
+      clack.log.info(t('display.file_created', { path: file.path }));
     } else if (file.action === 'skipped') {
-      clack.log.warn(`  ~ ${file.path} (skipped)`);
+      clack.log.warn(t('display.file_skipped', { path: file.path }));
     }
   }
 
@@ -140,7 +143,11 @@ export function displayValidationResults(result: {
 }): void {
   const { stats } = result;
   clack.log.info(
-    `${stats.fileCount} files, ${stats.agentCount} agents, ${stats.skillCount} skills`,
+    t('display.validation_stats', {
+      files: stats.fileCount,
+      agents: stats.agentCount,
+      skills: stats.skillCount,
+    }),
   );
 
   for (const err of result.errors) {
@@ -152,8 +159,8 @@ export function displayValidationResults(result: {
   }
 
   if (result.valid) {
-    clack.log.success('Validation passed!');
+    clack.log.success(t('display.validation_passed'));
   } else {
-    clack.log.error(`Validation failed with ${result.errors.length} error(s).`);
+    clack.log.error(t('display.validation_failed', { count: result.errors.length }));
   }
 }
