@@ -169,7 +169,7 @@ async function resolveFromConfigFile(
   const { preset } = loaded;
   const { projectName } = loaded;
   let shouldRunClaude = false;
-  let basePresetName: PresetName | undefined;
+  const basePresetName = preset.name !== 'custom' ? preset.name : undefined;
 
   clack.intro(`create-agent-system v${VERSION}`);
   clack.log.info(t('display.config_loaded'));
