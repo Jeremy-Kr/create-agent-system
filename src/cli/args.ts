@@ -29,58 +29,38 @@ export interface ParsedArgs {
   targetVersion?: string;
 }
 
-export function parseArgs(argv: string[]): ParsedArgs {
-  // Handle validate subcommand manually to avoid commander conflicts
-  if (argv[0] === 'validate') {
-    const rest = argv.slice(1);
-    const quiet = rest.includes('--quiet') || rest.includes('-q');
-    const positional = rest.filter((a) => a !== '--quiet' && a !== '-q');
-    const target = positional[0];
-    return {
-      command: 'validate',
-      target: target ? resolve(target) : undefined,
-      quiet,
-    };
-  }
+function routeSubcommand(argv: string[]): ParsedArgs | null {
+  if (argv[0] === 'validate') return parseValidateArgs(argv.slice(1));
+  if (argv[0] === 'diff') return parseDiffArgs(argv.slice(1));
+  if (argv[0] === 'add') return parseAddArgs(argv.slice(1));
+  if (argv[0] === 'search') return parseSearchArgs(argv.slice(1));
+  if (argv[0] === 'list') return parseListArgs(argv.slice(1));
+  if (argv[0] === 'migrate') return parseMigrateArgs(argv.slice(1));
+  if (argv[0] === 'edit') return parseEditArgs(argv.slice(1));
+  return null;
+}
 
-  // Handle diff subcommand
-  if (argv[0] === 'diff') {
-    const a = argv[1];
-    const b = argv[2];
-    if (!a || !b) {
-      throw new Error('Usage: create-agent-system diff <preset-a> <preset-b>');
-    }
-    return {
-      command: 'diff',
-      diffArgs: [a, b],
-    };
-  }
+function parseValidateArgs(args: string[]): ParsedArgs {
+  const quiet = args.includes('--quiet') || args.includes('-q');
+  const positional = args.filter((a) => a !== '--quiet' && a !== '-q');
+  const target = positional[0];
+  return {
+    command: 'validate',
+    target: target ? resolve(target) : undefined,
+    quiet,
+  };
+}
 
-  // Handle add subcommand
-  if (argv[0] === 'add') {
-    return parseAddArgs(argv.slice(1));
+function parseDiffArgs(args: string[]): ParsedArgs {
+  const a = args[0];
+  const b = args[1];
+  if (!a || !b) {
+    throw new Error('Usage: create-agent-system diff <preset-a> <preset-b>');
   }
+  return { command: 'diff', diffArgs: [a, b] };
+}
 
-  // Handle search subcommand
-  if (argv[0] === 'search') {
-    return parseSearchArgs(argv.slice(1));
-  }
-
-  // Handle list subcommand
-  if (argv[0] === 'list') {
-    return parseListArgs(argv.slice(1));
-  }
-
-  // Handle migrate subcommand
-  if (argv[0] === 'migrate') {
-    return parseMigrateArgs(argv.slice(1));
-  }
-
-  // Handle edit subcommand
-  if (argv[0] === 'edit') {
-    return parseEditArgs(argv.slice(1));
-  }
-
+function parseScaffoldOptions(argv: string[]): ParsedArgs {
   const program = new Command()
     .name('create-agent-system')
     .description('Scaffold Claude Code Agent Teams into your project')
@@ -124,12 +104,15 @@ export function parseArgs(argv: string[]): ParsedArgs {
     result.target = resolve(opts.target as string);
   }
 
-  // Validation: --yes requires --preset
   if (result.yes && !result.preset) {
     throw new Error('--yes requires --preset to be specified');
   }
 
   return result;
+}
+
+export function parseArgs(argv: string[]): ParsedArgs {
+  return routeSubcommand(argv) ?? parseScaffoldOptions(argv);
 }
 
 function parseRegistryType(args: string[]): RegistryItemType | undefined {
