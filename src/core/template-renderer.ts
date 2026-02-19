@@ -91,7 +91,3 @@ export async function renderClaudeMdTemplate(data: ClaudeMdTemplateData): Promis
   const headings = data.headings ?? DEFAULT_HEADINGS;
   return renderTemplate(templatePath, { ...data, headings });
 }
-
-export function clearTemplateCache(): void {
-  templateCache.clear();
-}
