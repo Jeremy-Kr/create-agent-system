@@ -58,6 +58,16 @@ describe('CLI Args (TICKET-014)', () => {
       expect(result.noRun).toBe(true);
     });
 
+    it('should parse --overwrite', () => {
+      const result = parseArgs(['--overwrite']);
+      expect(result.overwrite).toBe(true);
+    });
+
+    it('should default overwrite to false', () => {
+      const result = parseArgs([]);
+      expect(result.overwrite).toBe(false);
+    });
+
     it('should parse --target with absolute path', () => {
       const result = parseArgs(['--target', '/tmp/test-project']);
       expect(result.target).toBe('/tmp/test-project');

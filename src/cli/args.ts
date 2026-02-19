@@ -14,6 +14,7 @@ export interface ParsedArgs {
   noRun?: boolean;
   yes?: boolean;
   dryRun?: boolean;
+  overwrite?: boolean;
   saveConfig?: boolean;
   config?: string;
   ignoreConfig?: boolean;
@@ -73,6 +74,7 @@ function parseScaffoldOptions(argv: string[]): ParsedArgs {
     .option('--save-config', 'save current config to agent-system.config.yaml')
     .option('--config <path>', 'path to config file')
     .option('--ignore-config', 'ignore existing config file')
+    .option('--overwrite', 'overwrite existing files')
     .option('-l, --lang <locale>', 'language (ko, en)')
     .exitOverride()
     .configureOutput({ writeOut: () => {}, writeErr: () => {} });
@@ -90,6 +92,7 @@ function parseScaffoldOptions(argv: string[]): ParsedArgs {
     saveConfig: opts.saveConfig ?? false,
     config: opts.config as string | undefined,
     ignoreConfig: opts.ignoreConfig ?? false,
+    overwrite: opts.overwrite ?? false,
   };
 
   if (opts.lang) {

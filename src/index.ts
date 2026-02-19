@@ -213,7 +213,7 @@ async function handleScaffold(
     targetDir,
     techStack,
     dryRun: args.dryRun,
-    overwrite: false,
+    overwrite: args.overwrite,
   });
 
   displayResults(result.files, result.warnings);
