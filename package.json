@@ -1,17 +1,17 @@
 {
   "name": "create-agent-system",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Scaffold Claude Code Agent Teams-based development systems into your project",
   "type": "module",
   "bin": {
-    "create-agent-system": "./dist/index.js"
+    "create-agent-system": "./dist/index.mjs"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
     }
   },
   "files": [
@@ -26,7 +26,8 @@
     "test:watch": "vitest",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
   },
   "engines": {
     "node": ">=20"
@@ -38,8 +39,16 @@
     "scaffold",
     "cli"
   ],
-  "author": "",
+  "author": "Jeremy-Kr",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jeremy-Kr/create-agent-system.git"
+  },
+  "homepage": "https://github.com/Jeremy-Kr/create-agent-system#readme",
+  "bugs": {
+    "url": "https://github.com/Jeremy-Kr/create-agent-system/issues"
+  },
   "dependencies": {
     "@clack/prompts": "^1.0.1",
     "commander": "^14.0.0",
