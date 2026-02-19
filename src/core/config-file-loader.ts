@@ -28,6 +28,39 @@ function convertWorkflowToSnake(workflow: WorkflowConfig): RawWorkflow {
   };
 }
 
+function validateConfigRequiredFields(raw: Record<string, unknown>): void {
+  if (!raw.agents || typeof raw.agents !== 'object') {
+    throw new Error('Config file missing required field: "agents"');
+  }
+  if (!raw.workflow || typeof raw.workflow !== 'object') {
+    throw new Error('Config file missing required field: "workflow"');
+  }
+  if (!raw.skills || !Array.isArray(raw.skills)) {
+    throw new Error('Config file missing required field: "skills"');
+  }
+}
+
+function buildAgentsFromRaw(rawAgents: Record<string, unknown>): Preset['agents'] {
+  const agents = {} as Preset['agents'];
+  for (const name of AGENT_NAMES) {
+    const agentRaw = rawAgents[name];
+    if (isRecord(agentRaw)) {
+      agents[name] = {
+        enabled: Boolean(agentRaw.enabled),
+        model: isValidModel(agentRaw.model) ? agentRaw.model : 'opus',
+      };
+    } else {
+      agents[name] = { enabled: false, model: 'opus' };
+    }
+  }
+  return agents;
+}
+
+function buildSkillsFromRaw(rawSkills: unknown[]): SkillName[] {
+  const validated = isStringArray(rawSkills) ? rawSkills : [];
+  return validated.filter((s) => (SKILL_NAMES as readonly string[]).includes(s)) as SkillName[];
+}
+
 export async function loadConfigFile(
   targetDir: string,
 ): Promise<{ preset: Preset; projectName: string; language?: Locale }> {
@@ -40,42 +73,12 @@ export async function loadConfigFile(
   }
 
   const raw = safeParseYaml(content, 'config file');
-
-  // Validate required fields
-  if (!raw.agents || typeof raw.agents !== 'object') {
-    throw new Error('Config file missing required field: "agents"');
-  }
-  if (!raw.workflow || typeof raw.workflow !== 'object') {
-    throw new Error('Config file missing required field: "workflow"');
-  }
-  if (!raw.skills || !Array.isArray(raw.skills)) {
-    throw new Error('Config file missing required field: "skills"');
-  }
+  validateConfigRequiredFields(raw);
 
   const projectName = (raw.project_name as string) || 'my-project';
   const workflow = convertWorkflow(raw.workflow as RawWorkflow);
-
-  // Validate and build agents
-  const agents = {} as Preset['agents'];
-  const rawAgents = isRecord(raw.agents) ? raw.agents : {};
-  for (const name of AGENT_NAMES) {
-    const agentRaw = rawAgents[name];
-    if (isRecord(agentRaw)) {
-      agents[name] = {
-        enabled: Boolean(agentRaw.enabled),
-        model: isValidModel(agentRaw.model) ? agentRaw.model : 'opus',
-      };
-    } else {
-      agents[name] = { enabled: false, model: 'opus' };
-    }
-  }
-
-  // Validate skills
-  const rawSkills = isStringArray(raw.skills) ? raw.skills : [];
-  const skills = rawSkills.filter((s) =>
-    (SKILL_NAMES as readonly string[]).includes(s),
-  ) as SkillName[];
-
+  const agents = buildAgentsFromRaw(isRecord(raw.agents) ? raw.agents : {});
+  const skills = buildSkillsFromRaw(raw.skills as unknown[]);
   const scale = deriveScale(workflow);
 
   const preset: Preset = {
