@@ -131,62 +131,77 @@ async function handleEdit(_args: ParsedArgs, targetDir: string): Promise<never> 
   process.exit(0);
 }
 
+async function resolvePreset(
+  args: ParsedArgs,
+  targetDir: string,
+  techStack: TechStackInfo,
+): Promise<ResolvedPreset> {
+  const configDir = args.config ? dirname(resolve(args.config)) : targetDir;
+
+  // Non-interactive mode
+  if (args.yes && args.preset) {
+    if (args.preset === 'custom') {
+      throw new Error('--yes cannot be used with --preset custom (requires interactive input)');
+    }
+    return {
+      preset: await loadPreset(args.preset),
+      projectName: args.projectName ?? basename(targetDir),
+      shouldRunClaude: false,
+      basePresetName: args.preset,
+    };
+  }
+
+  // Config file mode
+  if (!args.ignoreConfig && !args.yes && (await detectConfigFile(configDir))) {
+    return resolveFromConfigFile(args, configDir, techStack);
+  }
+
+  // Interactive mode
+  return resolveFromPrompts(args, techStack);
+}
+
+async function resolveFromConfigFile(
+  args: Partial<ParsedArgs>,
+  configDir: string,
+  techStack: TechStackInfo,
+): Promise<ResolvedPreset> {
+  const loaded = await loadConfigFile(configDir);
+  const { preset } = loaded;
+  const { projectName } = loaded;
+  let shouldRunClaude = false;
+  let basePresetName: PresetName | undefined;
+
+  clack.intro(`create-agent-system v${VERSION}`);
+  clack.log.info(t('display.config_loaded'));
+  clack.log.info(`Project: ${projectName}, Base: ${preset.name}`);
+
+  const useConfig = cancelGuard(
+    await clack.confirm({ message: t('prompt.use_config'), initialValue: true }),
+  );
+
+  if (!useConfig) {
+    return resolveFromPrompts(args, techStack);
+  }
+
+  if (!args.noRun) {
+    shouldRunClaude = cancelGuard(
+      await clack.confirm({ message: t('prompt.start_claude'), initialValue: true }),
+    ) as boolean;
+  }
+
+  return { preset, projectName, shouldRunClaude, basePresetName };
+}
+
 async function handleScaffold(
   args: ParsedArgs,
   targetDir: string,
   techStack: TechStackInfo,
 ): Promise<void> {
-  let preset: Preset;
-  let projectName: string;
-  let shouldRunClaude = false;
-  let basePresetName: PresetName | undefined;
-
-  const configDir = args.config ? dirname(resolve(args.config)) : targetDir;
-
-  if (args.yes && args.preset) {
-    if (args.preset === 'custom') {
-      throw new Error('--yes cannot be used with --preset custom (requires interactive input)');
-    }
-    preset = await loadPreset(args.preset);
-    projectName = args.projectName ?? basename(targetDir);
-    shouldRunClaude = false;
-  } else if (!args.ignoreConfig && !args.yes && (await detectConfigFile(configDir))) {
-    const loaded = await loadConfigFile(configDir);
-    preset = loaded.preset;
-    projectName = loaded.projectName;
-    clack.intro(`create-agent-system v${VERSION}`);
-    clack.log.info(t('display.config_loaded'));
-    clack.log.info(`Project: ${projectName}, Base: ${preset.name}`);
-
-    const useConfig = cancelGuard(
-      await clack.confirm({
-        message: t('prompt.use_config'),
-        initialValue: true,
-      }),
-    );
-
-    if (!useConfig) {
-      ({ preset, projectName, shouldRunClaude, basePresetName } = await resolveFromPrompts(
-        args,
-        techStack,
-      ));
-    } else {
-      if (!args.noRun) {
-        const launch = cancelGuard(
-          await clack.confirm({
-            message: t('prompt.start_claude'),
-            initialValue: true,
-          }),
-        );
-        shouldRunClaude = launch as boolean;
-      }
-    }
-  } else {
-    ({ preset, projectName, shouldRunClaude, basePresetName } = await resolveFromPrompts(
-      args,
-      techStack,
-    ));
-  }
+  const { preset, projectName, shouldRunClaude, basePresetName } = await resolvePreset(
+    args,
+    targetDir,
+    techStack,
+  );
 
   if (args.dryRun) {
     clack.log.info(t('display.dry_run'));
