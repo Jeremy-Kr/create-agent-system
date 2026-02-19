@@ -33,8 +33,6 @@ export interface ScaffoldResult {
   warnings: string[];
 }
 
-// --- TICKET-012: Computation helpers ---
-
 export function computeAgentSkills(agentName: AgentName, presetSkills: SkillName[]): SkillName[] {
   const defaults = AGENT_DEFAULT_SKILLS[agentName];
   return defaults.filter((skill) => presetSkills.includes(skill));
@@ -98,8 +96,6 @@ export function composeClaudeMdData(
     },
   };
 }
-
-// --- TICKET-011: Scaffold core logic ---
 
 async function writeAgentFiles(
   enabledAgents: AgentName[],

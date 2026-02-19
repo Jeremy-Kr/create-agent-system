@@ -207,6 +207,20 @@ function checkDuplicateContent(relPath: string, body: string): ValidationIssue |
   return null;
 }
 
+function extractImportPaths(content: string): string[] {
+  const withoutCodeBlocks = content.replace(/```[\s\S]*?```/g, '');
+
+  const paths: string[] = [];
+  const regex = /@([^\s,)]+)/g;
+  for (const match of withoutCodeBlocks.matchAll(regex)) {
+    const path = match[1];
+    if (path.includes('/') && !path.startsWith('types/') && !path.startsWith('anthropic/')) {
+      paths.push(path);
+    }
+  }
+  return paths;
+}
+
 async function checkImportPaths(content: string, targetDir: string): Promise<ValidationIssue[]> {
   const issues: ValidationIssue[] = [];
   const importPaths = extractImportPaths(content);
@@ -346,18 +360,4 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
     warnings,
     stats: { agentCount, skillCount, fileCount },
   };
-}
-
-function extractImportPaths(content: string): string[] {
-  const withoutCodeBlocks = content.replace(/```[\s\S]*?```/g, '');
-
-  const paths: string[] = [];
-  const regex = /@([^\s,)]+)/g;
-  for (const match of withoutCodeBlocks.matchAll(regex)) {
-    const path = match[1];
-    if (path.includes('/') && !path.startsWith('types/') && !path.startsWith('anthropic/')) {
-      paths.push(path);
-    }
-  }
-  return paths;
 }
