@@ -97,62 +97,41 @@ export async function installFromRegistry(
   return result;
 }
 
-async function installSingleItem(
-  name: string,
-  index: RegistryIndex,
+async function handleDependencies(
+  manifest: ItemManifest,
   options: InstallOptions,
   result: InstallResult,
+  name: string,
+  index: RegistryIndex,
 ): Promise<void> {
-  // Find entry in registry
-  const found = findEntry(index, name, options.type);
-  if (!found) {
-    const typeHint = options.type ? ` (type: ${options.type})` : '';
-    throw new Error(`"${name}" not found in registry${typeHint}`);
-  }
-
-  const { entry, type } = found;
-
-  // Fetch manifest for dependencies and metadata
-  const manifest = await fetchItemManifest(entry.path);
-
-  // Check CLI version compatibility
-  if (manifest.minCliVersion) {
-    result.warnings.push(`"${name}" recommends CLI version >=${manifest.minCliVersion}`);
-  }
-
-  // Handle dependencies
   const missingDeps = await findMissingDependencies(manifest, options.targetDir, index);
-  if (missingDeps.length > 0) {
-    const shouldInstall = options.yes || (await options.onDependencies?.(missingDeps)) || false;
-    if (shouldInstall) {
-      await installFromRegistry(missingDeps, options);
-    } else {
-      result.warnings.push(`Skipped dependencies for "${name}": ${missingDeps.join(', ')}`);
-    }
+  if (missingDeps.length === 0) return;
+
+  const shouldInstall = options.yes || (await options.onDependencies?.(missingDeps)) || false;
+  if (shouldInstall) {
+    await installFromRegistry(missingDeps, options);
+  } else {
+    result.warnings.push(`Skipped dependencies for "${name}": ${missingDeps.join(', ')}`);
   }
+}
 
-  // Fetch content
-  const filenames = getContentFilename(type, name);
-  const { content, filename } = await fetchContent(entry.path, filenames);
-
-  // Process content (render template if needed)
-  const processed = await processContent(content, filename, options.templateVars);
-
-  // Determine target path
-  const targetPath = getTargetPath(options.targetDir, type, name);
-
-  // Handle conflicts
+async function handleConflictAndWrite(
+  targetPath: string,
+  processed: string,
+  options: InstallOptions,
+  result: InstallResult,
+  name: string,
+  type: RegistryItemType,
+): Promise<void> {
   const exists = await fileExists(targetPath);
   if (exists && !options.force) {
     const resolution = options.yes ? 'skip' : ((await options.onConflict?.(targetPath)) ?? 'skip');
-
     if (resolution === 'skip') {
       result.skipped.push({ name, reason: 'File already exists' });
       return;
     }
   }
 
-  // Write file (overwrite if forced or user chose to overwrite)
   const shouldOverwrite = options.force || exists;
   const { written } = await writeFileSafe(targetPath, processed, shouldOverwrite);
   if (written) {
@@ -162,35 +141,69 @@ async function installSingleItem(
   }
 }
 
+async function installSingleItem(
+  name: string,
+  index: RegistryIndex,
+  options: InstallOptions,
+  result: InstallResult,
+): Promise<void> {
+  const found = findEntry(index, name, options.type);
+  if (!found) {
+    const typeHint = options.type ? ` (type: ${options.type})` : '';
+    throw new Error(`"${name}" not found in registry${typeHint}`);
+  }
+
+  const { entry, type } = found;
+  const manifest = await fetchItemManifest(entry.path);
+
+  if (manifest.minCliVersion) {
+    result.warnings.push(`"${name}" recommends CLI version >=${manifest.minCliVersion}`);
+  }
+
+  await handleDependencies(manifest, options, result, name, index);
+
+  const filenames = getContentFilename(type, name);
+  const { content, filename } = await fetchContent(entry.path, filenames);
+  const processed = await processContent(content, filename, options.templateVars);
+  const targetPath = getTargetPath(options.targetDir, type, name);
+
+  await handleConflictAndWrite(targetPath, processed, options, result, name, type);
+}
+
+async function findMissingItems(
+  items: string[] | undefined,
+  index: RegistryIndex,
+  type: RegistryItemType,
+  pathFn: (name: string) => string,
+): Promise<string[]> {
+  if (!items) return [];
+  const missing: string[] = [];
+  for (const name of items) {
+    if (!(await fileExists(pathFn(name)))) {
+      if (findEntry(index, name, type)) {
+        missing.push(name);
+      }
+    }
+  }
+  return missing;
+}
+
 async function findMissingDependencies(
   manifest: ItemManifest,
   targetDir: string,
   index: RegistryIndex,
 ): Promise<string[]> {
-  const missing: string[] = [];
-
-  if (manifest.dependencies?.skills) {
-    for (const skillName of manifest.dependencies.skills) {
-      const skillPath = join(targetDir, SKILLS_DIR, skillName, 'SKILL.md');
-      if (!(await fileExists(skillPath))) {
-        // Only add if it exists in registry
-        if (findEntry(index, skillName, 'skill')) {
-          missing.push(skillName);
-        }
-      }
-    }
-  }
-
-  if (manifest.dependencies?.agents) {
-    for (const agentName of manifest.dependencies.agents) {
-      const agentPath = join(targetDir, AGENTS_DIR, `${agentName}.md`);
-      if (!(await fileExists(agentPath))) {
-        if (findEntry(index, agentName, 'agent')) {
-          missing.push(agentName);
-        }
-      }
-    }
-  }
-
-  return missing;
+  const missingSkills = await findMissingItems(
+    manifest.dependencies?.skills,
+    index,
+    'skill',
+    (name) => join(targetDir, SKILLS_DIR, name, 'SKILL.md'),
+  );
+  const missingAgents = await findMissingItems(
+    manifest.dependencies?.agents,
+    index,
+    'agent',
+    (name) => join(targetDir, AGENTS_DIR, `${name}.md`),
+  );
+  return [...missingSkills, ...missingAgents];
 }
