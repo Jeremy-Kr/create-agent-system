@@ -1,11 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse as parseYaml } from 'yaml';
 import type { PresetName, WorkflowConfig } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
 import { PRESET_NAMES } from '../utils/constants.js';
-import { isRecord } from '../utils/type-guards.js';
+import { safeParseYaml } from '../utils/yaml.js';
 
 const presetsDir = fileURLToPath(new URL('../../presets/', import.meta.url));
 
@@ -44,21 +43,7 @@ export function getPresetPath(presetName: PresetName): string {
 }
 
 export function parsePresetContent(content: string, presetName: string): Preset {
-  let raw: Record<string, unknown>;
-  try {
-    const parsed = parseYaml(content);
-    if (!isRecord(parsed)) {
-      throw new Error(
-        `Failed to parse preset "${presetName}": malformed YAML (expected an object, got ${typeof parsed})`,
-      );
-    }
-    raw = parsed;
-  } catch (error) {
-    if (error instanceof Error && error.message.startsWith('Failed to parse preset')) {
-      throw error;
-    }
-    throw new Error(`Failed to parse preset "${presetName}": YAML syntax error`);
-  }
+  const raw = safeParseYaml(content, `preset "${presetName}"`);
 
   for (const field of ['name', 'description', 'scale', 'agents', 'workflow', 'skills']) {
     if (!(field in raw)) {

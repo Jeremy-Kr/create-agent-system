@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
+import { stringify as stringifyYaml } from 'yaml';
 import type { Locale } from '../i18n/types.js';
 import type { PresetName, SkillName, WorkflowConfig } from '../types/config.js';
 import type { ConfigFile } from '../types/config-file.js';
@@ -8,6 +8,7 @@ import type { Preset } from '../types/preset.js';
 import { AGENT_NAMES, CONFIG_FILE_NAME, SKILL_NAMES } from '../utils/constants.js';
 import { fileExists } from '../utils/fs.js';
 import { isRecord, isStringArray, isValidModel } from '../utils/type-guards.js';
+import { safeParseYaml } from '../utils/yaml.js';
 import { convertWorkflow, deriveScale, type RawWorkflow } from './preset-loader.js';
 
 export function getConfigFilePath(targetDir: string): string {
@@ -38,19 +39,7 @@ export async function loadConfigFile(
     throw new Error(`Config file not found: ${filePath}`);
   }
 
-  let raw: Record<string, unknown>;
-  try {
-    const parsed = parseYaml(content);
-    if (!isRecord(parsed)) {
-      throw new Error('Failed to parse config file: malformed YAML (expected an object)');
-    }
-    raw = parsed;
-  } catch (error) {
-    if (error instanceof Error && error.message.startsWith('Failed to parse config file')) {
-      throw error;
-    }
-    throw new Error('Failed to parse config file: YAML syntax error');
-  }
+  const raw = safeParseYaml(content, 'config file');
 
   // Validate required fields
   if (!raw.agents || typeof raw.agents !== 'object') {
