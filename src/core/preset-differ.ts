@@ -48,14 +48,13 @@ export function diffPresets(presetA: Preset, presetB: Preset): PresetDiffResult 
   };
 }
 
-export function displayDiff(diff: PresetDiffResult): void {
-  clack.log.info(t('differ.comparing', { a: diff.nameA, b: diff.nameB }));
-
+function displayScaleDiff(diff: PresetDiffResult): void {
   if (diff.scaleChanged) {
     clack.log.step(t('differ.scale', { a: diff.scaleA ?? '', b: diff.scaleB ?? '' }));
   }
+}
 
-  // Agents
+function displayAgentsDiff(diff: PresetDiffResult): void {
   if (diff.agents.length > 0) {
     clack.log.step(t('differ.agents'));
     for (const d of diff.agents) {
@@ -65,8 +64,9 @@ export function displayDiff(diff: PresetDiffResult): void {
   } else {
     clack.log.step(t('differ.agents_identical'));
   }
+}
 
-  // Workflow
+function displayWorkflowDiff(diff: PresetDiffResult): void {
   if (diff.workflow.length > 0) {
     clack.log.step(t('differ.workflow'));
     for (const d of diff.workflow) {
@@ -75,8 +75,9 @@ export function displayDiff(diff: PresetDiffResult): void {
   } else {
     clack.log.step(t('differ.workflow_identical'));
   }
+}
 
-  // Skills
+function displaySkillsDiff(diff: PresetDiffResult): void {
   const hasSkillDiff = diff.skills.onlyInA.length > 0 || diff.skills.onlyInB.length > 0;
   if (hasSkillDiff) {
     clack.log.step(t('differ.skills'));
@@ -92,8 +93,9 @@ export function displayDiff(diff: PresetDiffResult): void {
   } else {
     clack.log.step(t('differ.skills_identical'));
   }
+}
 
-  // Summary
+function displayDiffSummary(diff: PresetDiffResult): void {
   const totalChanges =
     diff.agents.length +
     diff.workflow.length +
@@ -106,4 +108,13 @@ export function displayDiff(diff: PresetDiffResult): void {
   } else {
     clack.log.info(t('display.differences_count', { count: totalChanges }));
   }
+}
+
+export function displayDiff(diff: PresetDiffResult): void {
+  clack.log.info(t('differ.comparing', { a: diff.nameA, b: diff.nameB }));
+  displayScaleDiff(diff);
+  displayAgentsDiff(diff);
+  displayWorkflowDiff(diff);
+  displaySkillsDiff(diff);
+  displayDiffSummary(diff);
 }
