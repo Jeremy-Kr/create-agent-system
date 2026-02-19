@@ -54,6 +54,8 @@ export interface Messages {
   'registry.items_count': string;
   'registry.installed_count': string;
   'registry.no_installed': string;
+  'registry.local_items_count': string;
+  'registry.no_local_items': string;
 
   // === Display messages ===
   'display.scaffolding_complete': string;

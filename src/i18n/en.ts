@@ -54,6 +54,8 @@ export const en: Messages = {
   'registry.items_count': '{count} item(s):',
   'registry.installed_count': 'Installed {count} item(s).',
   'registry.no_installed': 'No items installed.',
+  'registry.local_items_count': '{count} local item(s) installed:',
+  'registry.no_local_items': 'No local items installed.',
 
   // === Display messages ===
   'display.scaffolding_complete': 'Scaffolding complete!',

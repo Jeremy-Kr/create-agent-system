@@ -59,6 +59,9 @@ export const ko: Messages = {
   'registry.installed_count':
     '{count}\uac1c \ud56d\ubaa9\uc774 \uc124\uce58\ub418\uc5c8\uc2b5\ub2c8\ub2e4.',
   'registry.no_installed': '\uc124\uce58\ub41c \ud56d\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.',
+  'registry.local_items_count': '\ub85c\uceec\uc5d0 {count}\uac1c \ud56d\ubaa9 \uc124\uce58\ub428:',
+  'registry.no_local_items':
+    '\ub85c\uceec\uc5d0 \uc124\uce58\ub41c \ud56d\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.',
 
   // === \ud45c\uc2dc \uba54\uc2dc\uc9c0 ===
   'display.scaffolding_complete': '\uc2a4\uce90\ud3f4\ub529 \uc644\ub8cc!',

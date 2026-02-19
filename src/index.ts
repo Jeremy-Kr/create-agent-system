@@ -14,6 +14,7 @@ import {
 } from './cli/registry-prompts.js';
 import { runClaudeCode } from './cli/runner.js';
 import { detectConfigFile, loadConfigFile, saveConfigFile } from './core/config-file-loader.js';
+import { listLocalItems } from './core/local-scanner.js';
 import { diffPresets, displayDiff } from './core/preset-differ.js';
 import { loadPreset } from './core/preset-loader.js';
 import { fetchRegistryIndex } from './core/registry-client.js';
@@ -85,11 +86,23 @@ async function handleSearch(args: ParsedArgs): Promise<never> {
   process.exit(0);
 }
 
-async function handleList(args: ParsedArgs): Promise<never> {
+async function handleList(args: ParsedArgs, targetDir: string): Promise<never> {
   clack.intro(`create-agent-system v${VERSION}`);
-  const index = await fetchRegistryIndex();
-  const results = listRegistry(index, { type: args.registryType });
-  displayRegistryList(results);
+
+  if (args.installed) {
+    const results = await listLocalItems(targetDir, args.registryType);
+    if (results.length === 0) {
+      clack.log.warn(t('registry.no_local_items'));
+    } else {
+      clack.log.info(t('registry.local_items_count', { count: results.length }));
+      displayRegistryList(results);
+    }
+  } else {
+    const index = await fetchRegistryIndex();
+    const results = listRegistry(index, { type: args.registryType });
+    displayRegistryList(results);
+  }
+
   clack.outro('');
   process.exit(0);
 }
@@ -247,7 +260,7 @@ async function main() {
     if (args.command === 'edit') await handleEdit(args, targetDir);
     if (args.command === 'add') await handleAdd(args, targetDir);
     if (args.command === 'search') await handleSearch(args);
-    if (args.command === 'list') await handleList(args);
+    if (args.command === 'list') await handleList(args, targetDir);
 
     const detectedTechStack = await detectTechStack(targetDir);
     await handleScaffold(args, targetDir, detectedTechStack);
