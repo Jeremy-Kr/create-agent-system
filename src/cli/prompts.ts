@@ -4,6 +4,7 @@ import type { PresetName, TechStackInfo } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
 import { VERSION } from '../utils/constants.js';
 import type { ParsedArgs } from './args.js';
+import { cancelGuard } from './clack-utils.js';
 
 export interface PromptResult {
   preset: PresetName;
@@ -42,15 +43,12 @@ export async function runInteractivePrompts(
     preset = partialArgs.preset;
     clack.log.info(`Preset: ${preset}`);
   } else {
-    const selected = await clack.select({
-      message: t('prompt.choose_preset'),
-      options: [...getPresetOptions()],
-    });
-    if (clack.isCancel(selected)) {
-      clack.cancel(t('prompt.cancel'));
-      process.exit(0);
-    }
-    preset = selected as PresetName;
+    preset = cancelGuard(
+      await clack.select({
+        message: t('prompt.choose_preset'),
+        options: [...getPresetOptions()],
+      }),
+    ) as PresetName;
   }
 
   // Custom preset flow
@@ -65,20 +63,17 @@ export async function runInteractivePrompts(
     projectName = partialArgs.projectName;
     clack.log.info(`Project: ${projectName}`);
   } else {
-    const name = await clack.text({
-      message: t('prompt.project_name'),
-      placeholder: t('prompt.project_name.placeholder'),
-      validate: (value: string | undefined) => {
-        if (!value || !isValidProjectName(value)) {
-          return t('prompt.project_name.invalid');
-        }
-      },
-    });
-    if (clack.isCancel(name)) {
-      clack.cancel(t('prompt.cancel'));
-      process.exit(0);
-    }
-    projectName = name as string;
+    projectName = cancelGuard(
+      await clack.text({
+        message: t('prompt.project_name'),
+        placeholder: t('prompt.project_name.placeholder'),
+        validate: (value: string | undefined) => {
+          if (!value || !isValidProjectName(value)) {
+            return t('prompt.project_name.invalid');
+          }
+        },
+      }),
+    ) as string;
   }
 
   // Tech stack confirmation
@@ -90,28 +85,23 @@ export async function runInteractivePrompts(
       detectedTechStack.cssFramework,
       detectedTechStack.packageManager,
     ].filter(Boolean);
-    const confirmed = await clack.confirm({
-      message: t('prompt.tech_stack_confirm', { stack: parts.join(' + ') }),
-      initialValue: true,
-    });
-    if (clack.isCancel(confirmed)) {
-      clack.cancel(t('prompt.cancel'));
-      process.exit(0);
-    }
+    cancelGuard(
+      await clack.confirm({
+        message: t('prompt.tech_stack_confirm', { stack: parts.join(' + ') }),
+        initialValue: true,
+      }),
+    );
   }
 
   // Claude Code launch
   let shouldRunClaude = false;
   if (!partialArgs.noRun) {
-    const launch = await clack.confirm({
-      message: t('prompt.start_claude'),
-      initialValue: true,
-    });
-    if (clack.isCancel(launch)) {
-      clack.cancel(t('prompt.cancel'));
-      process.exit(0);
-    }
-    shouldRunClaude = launch as boolean;
+    shouldRunClaude = cancelGuard(
+      await clack.confirm({
+        message: t('prompt.start_claude'),
+        initialValue: true,
+      }),
+    ) as boolean;
   }
 
   return { preset, projectName, techStack, shouldRunClaude, customPreset };
