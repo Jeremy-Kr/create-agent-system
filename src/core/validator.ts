@@ -224,18 +224,8 @@ async function checkImportPaths(content: string, targetDir: string): Promise<Val
 
 // --- Main validate function ---
 
-export async function validate(targetDir: string): Promise<ValidationResult> {
+async function checkStructure(agentsDir: string, claudeMdPath: string): Promise<ValidationIssue[]> {
   const errors: ValidationIssue[] = [];
-  const warnings: ValidationIssue[] = [];
-  let agentCount = 0;
-  let skillCount = 0;
-  let fileCount = 0;
-
-  const agentsDir = join(targetDir, '.claude', 'agents');
-  const skillsDir = join(targetDir, '.claude', 'skills');
-  const claudeMdPath = join(targetDir, 'CLAUDE.md');
-
-  // Check structural requirements
   if (!(await dirExists(agentsDir))) {
     errors.push({
       rule: 'STRUCTURE',
@@ -243,7 +233,6 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       message: t('validator.missing_agents_dir'),
     });
   }
-
   if (!(await fileExists(claudeMdPath))) {
     errors.push({
       rule: 'STRUCTURE',
@@ -251,38 +240,87 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
       message: t('validator.missing_claude_md'),
     });
   }
+  return errors;
+}
 
-  if (errors.length > 0) {
-    return {
-      valid: false,
-      errors,
-      warnings,
-      stats: { agentCount: 0, skillCount: 0, fileCount: 0 },
-    };
-  }
-
-  // Scan agent files
-  const agentFiles = (await readdir(agentsDir)).filter((f) => f.endsWith('.md'));
-  agentCount = agentFiles.length;
-  fileCount += agentCount;
-
-  // Scan skill directories
+async function scanSkills(skillsDir: string): Promise<number> {
+  let count = 0;
   if (await dirExists(skillsDir)) {
     const skillDirs = await readdir(skillsDir);
     const skillChecks = await Promise.all(
       skillDirs.map((dir) => fileExists(join(skillsDir, dir, 'SKILL.md'))),
     );
     for (const exists of skillChecks) {
-      if (exists) {
-        skillCount++;
-        fileCount++;
-      }
+      if (exists) count++;
     }
   }
+  return count;
+}
 
-  fileCount++;
+async function validateAgentFile(
+  relPath: string,
+  content: string,
+  skillsDir: string,
+): Promise<{ errors: ValidationIssue[]; warnings: ValidationIssue[] }> {
+  const errors: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
 
-  // Validate each agent file
+  const yamlResult = checkYamlParsing(relPath, content);
+  if (!yamlResult.parsed) {
+    return { errors: yamlResult.issues, warnings };
+  }
+
+  const { data, body } = yamlResult.parsed;
+
+  // Error rules
+  const nameIssue = checkMissingName(relPath, data);
+  if (nameIssue) errors.push(nameIssue);
+  const descIssue = checkMissingDescription(relPath, data);
+  if (descIssue) errors.push(descIssue);
+  errors.push(...checkUnsupportedFields(relPath, data));
+  const modelIssue = checkInvalidModel(relPath, data);
+  if (modelIssue) errors.push(modelIssue);
+  errors.push(...(await checkInvalidSkillRef(relPath, data, skillsDir)));
+
+  // Warning rules
+  const shortDesc = checkShortDescription(relPath, data);
+  if (shortDesc) warnings.push(shortDesc);
+  const longDesc = checkLongDescription(relPath, data);
+  if (longDesc) warnings.push(longDesc);
+  const missingTools = checkMissingTools(relPath, data);
+  if (missingTools) warnings.push(missingTools);
+  const duplicateContent = checkDuplicateContent(relPath, body);
+  if (duplicateContent) warnings.push(duplicateContent);
+
+  return { errors, warnings };
+}
+
+export async function validate(targetDir: string): Promise<ValidationResult> {
+  const errors: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
+
+  const agentsDir = join(targetDir, '.claude', 'agents');
+  const skillsDir = join(targetDir, '.claude', 'skills');
+  const claudeMdPath = join(targetDir, 'CLAUDE.md');
+
+  // 1. Structure check
+  const structureErrors = await checkStructure(agentsDir, claudeMdPath);
+  if (structureErrors.length > 0) {
+    return {
+      valid: false,
+      errors: structureErrors,
+      warnings,
+      stats: { agentCount: 0, skillCount: 0, fileCount: 0 },
+    };
+  }
+
+  // 2. Scan files
+  const agentFiles = (await readdir(agentsDir)).filter((f) => f.endsWith('.md'));
+  const agentCount = agentFiles.length;
+  const skillCount = await scanSkills(skillsDir);
+  const fileCount = agentCount + skillCount + 1;
+
+  // 3. Validate agent files
   const agentContents = await Promise.all(
     agentFiles.map(async (agentFile) => {
       const filePath = join(agentsDir, agentFile);
@@ -293,43 +331,12 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
   );
 
   for (const { relPath, content } of agentContents) {
-    const yamlResult = checkYamlParsing(relPath, content);
-    if (!yamlResult.parsed) {
-      errors.push(...yamlResult.issues);
-      continue;
-    }
-
-    const { data, body } = yamlResult.parsed;
-
-    // Error rules
-    const nameIssue = checkMissingName(relPath, data);
-    if (nameIssue) errors.push(nameIssue);
-
-    const descIssue = checkMissingDescription(relPath, data);
-    if (descIssue) errors.push(descIssue);
-
-    errors.push(...checkUnsupportedFields(relPath, data));
-
-    const modelIssue = checkInvalidModel(relPath, data);
-    if (modelIssue) errors.push(modelIssue);
-
-    errors.push(...(await checkInvalidSkillRef(relPath, data, skillsDir)));
-
-    // Warning rules
-    const shortDesc = checkShortDescription(relPath, data);
-    if (shortDesc) warnings.push(shortDesc);
-
-    const longDesc = checkLongDescription(relPath, data);
-    if (longDesc) warnings.push(longDesc);
-
-    const missingTools = checkMissingTools(relPath, data);
-    if (missingTools) warnings.push(missingTools);
-
-    const duplicateContent = checkDuplicateContent(relPath, body);
-    if (duplicateContent) warnings.push(duplicateContent);
+    const result = await validateAgentFile(relPath, content, skillsDir);
+    errors.push(...result.errors);
+    warnings.push(...result.warnings);
   }
 
-  // E007: CLAUDE.md import paths
+  // 4. CLAUDE.md import paths
   const claudeMdContent = await readFile(claudeMdPath, 'utf-8');
   errors.push(...(await checkImportPaths(claudeMdContent, targetDir)));
 
