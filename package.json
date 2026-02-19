@@ -8,11 +8,16 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
     "templates",
-    "presets",
-    "plugin"
+    "presets"
   ],
   "scripts": {
     "build": "tsdown",
