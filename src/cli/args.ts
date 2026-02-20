@@ -7,7 +7,16 @@ import { isRegistryItemType } from '../types/registry.js';
 import { PRESET_NAMES } from '../utils/constants.js';
 
 export interface ParsedArgs {
-  command: 'scaffold' | 'validate' | 'diff' | 'add' | 'search' | 'list' | 'migrate' | 'edit';
+  command:
+    | 'scaffold'
+    | 'validate'
+    | 'diff'
+    | 'add'
+    | 'search'
+    | 'list'
+    | 'migrate'
+    | 'edit'
+    | 'sync-spec';
   preset?: PresetName;
   projectName?: string;
   target?: string;
@@ -28,17 +37,31 @@ export interface ParsedArgs {
   quiet?: boolean;
   lang?: Locale;
   targetVersion?: string;
+  noDocCheck?: boolean;
 }
 
 function routeSubcommand(argv: string[]): ParsedArgs | null {
-  if (argv[0] === 'validate') return parseValidateArgs(argv.slice(1));
-  if (argv[0] === 'diff') return parseDiffArgs(argv.slice(1));
-  if (argv[0] === 'add') return parseAddArgs(argv.slice(1));
-  if (argv[0] === 'search') return parseSearchArgs(argv.slice(1));
-  if (argv[0] === 'list') return parseListArgs(argv.slice(1));
-  if (argv[0] === 'migrate') return parseMigrateArgs(argv.slice(1));
-  if (argv[0] === 'edit') return parseEditArgs(argv.slice(1));
-  return null;
+  const rest = argv.slice(1);
+  switch (argv[0]) {
+    case 'validate':
+      return parseValidateArgs(rest);
+    case 'diff':
+      return parseDiffArgs(rest);
+    case 'add':
+      return parseAddArgs(rest);
+    case 'search':
+      return parseSearchArgs(rest);
+    case 'list':
+      return parseListArgs(rest);
+    case 'migrate':
+      return parseMigrateArgs(rest);
+    case 'edit':
+      return parseEditArgs(rest);
+    case 'sync-spec':
+      return { command: 'sync-spec' };
+    default:
+      return null;
+  }
 }
 
 function parseValidateArgs(args: string[]): ParsedArgs {
@@ -75,6 +98,7 @@ function parseScaffoldOptions(argv: string[]): ParsedArgs {
     .option('--config <path>', 'path to config file')
     .option('--ignore-config', 'ignore existing config file')
     .option('--overwrite', 'overwrite existing files')
+    .option('--no-doc-check', 'skip doc-spec validation (offline/CI)')
     .option('-l, --lang <locale>', 'language (ko, en)')
     .exitOverride()
     .configureOutput({ writeOut: () => {}, writeErr: () => {} });
@@ -93,6 +117,7 @@ function parseScaffoldOptions(argv: string[]): ParsedArgs {
     config: opts.config as string | undefined,
     ignoreConfig: opts.ignoreConfig ?? false,
     overwrite: opts.overwrite ?? false,
+    noDocCheck: opts.docCheck === false,
   };
 
   if (opts.lang) {

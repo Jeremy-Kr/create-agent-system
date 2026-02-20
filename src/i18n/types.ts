@@ -86,6 +86,15 @@ export interface Messages {
   'validator.long_description': string;
   'validator.missing_tools': string;
   'validator.duplicate_content': string;
+  'validator.invalid_permission_mode': string;
+  'validator.missing_example_blocks': string;
+  'validator.invalid_hook_event': string;
+  'validator.invalid_hook_structure': string;
+
+  // === Display messages (doc-spec) ===
+  'display.doc_check_passed': string;
+  'display.doc_check_failed': string;
+  'display.doc_check_skipped': string;
 
   // === Differ messages (src/core/preset-differ.ts) ===
   'differ.comparing': string;
@@ -156,6 +165,14 @@ export interface Messages {
   'edit.save_and_scaffold': string;
   'edit.save_cancel': string;
   'edit.saved': string;
+
+  // === Sync-spec messages ===
+  'display.sync_spec_fetching': string;
+  'display.sync_spec_library': string;
+  'display.sync_spec_fetched_at': string;
+  'display.sync_spec_no_diff': string;
+  'display.sync_spec_diffs_found': string;
+  'display.sync_spec_error': string;
 
   // === Runner messages ===
   'runner.claude_not_found': string;

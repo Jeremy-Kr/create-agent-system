@@ -95,6 +95,19 @@ export const en: Messages = {
     "No 'tools' field in {file}. All tools will be inherited. If intentional, this is fine.",
   'validator.duplicate_content':
     "Agent definition {file} appears to contain '{keyword}' which should be in CLAUDE.md only (SSOT principle)",
+  'validator.invalid_permission_mode':
+    "Invalid permissionMode value '{mode}' in {file}. Valid values: {valid}",
+  'validator.missing_example_blocks':
+    'Description in {file} is missing <example> blocks. Claude Code uses examples to determine when to trigger agents.',
+  'validator.invalid_hook_event':
+    "Invalid hook event '{event}' in settings.json. Valid events: {valid}",
+  'validator.invalid_hook_structure':
+    "Invalid hook structure in settings.json for event '{event}': {reason}",
+
+  // === Display messages (doc-spec) ===
+  'display.doc_check_passed': 'Doc-spec validation passed.',
+  'display.doc_check_failed': 'Doc-spec validation found {count} issue(s).',
+  'display.doc_check_skipped': 'Doc-spec validation skipped (--no-doc-check).',
 
   // === Differ messages ===
   'differ.comparing': 'Comparing: {a} \u2194 {b}',
@@ -165,6 +178,14 @@ export const en: Messages = {
   'edit.save_and_scaffold': 'Save and re-scaffold',
   'edit.save_cancel': 'Cancel',
   'edit.saved': 'Configuration saved.',
+
+  // === Sync-spec messages ===
+  'display.sync_spec_fetching': 'Fetching official spec from Context7...',
+  'display.sync_spec_library': 'Library ID: {id}',
+  'display.sync_spec_fetched_at': 'Fetched at: {date}',
+  'display.sync_spec_no_diff': 'Bundled spec is up-to-date with official docs.',
+  'display.sync_spec_diffs_found': 'Found {count} difference(s) with official docs.',
+  'display.sync_spec_error': 'Failed to sync spec: {message}',
 
   // === Runner messages ===
   'runner.claude_not_found':

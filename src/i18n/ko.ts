@@ -107,9 +107,22 @@ export const ko: Messages = {
   'validator.missing_tools':
     "{file}\uc5d0 'tools' \ud544\ub4dc\uac00 \uc5c6\uc2b5\ub2c8\ub2e4. \ubaa8\ub4e0 \ub3c4\uad6c\uac00 \uc0c1\uc18d\ub429\ub2c8\ub2e4. \uc758\ub3c4\uc801\uc774\ub77c\uba74 \ubb38\uc81c\uc5c6\uc2b5\ub2c8\ub2e4.",
   'validator.duplicate_content':
-    "\uc5d0\uc774\uc804\ud2b8 \uc815\uc758 {file}\uc5d0 '{keyword}'\uc774 \ud3ec\ud568\ub418\uc5b4 \uc788\uc2b5\ub2c8\ub2e4. CLAUDE.md\uc5d0\ub9cc \uc788\uc5b4\uc57c \ud569\ub2c8\ub2e4 (SSOT \uc6d0\uce59)",
+    "에이전트 정의 {file}에 '{keyword}'이 포함되어 있습니다. CLAUDE.md에만 있어야 합니다 (SSOT 원칙)",
+  'validator.invalid_permission_mode':
+    "{file}에 잘못된 permissionMode 값 '{mode}'. 유효한 값: {valid}",
+  'validator.missing_example_blocks':
+    '{file}의 description에 <example> 블록이 없습니다. Claude Code는 에이전트 트리거 조건을 example로 판단합니다.',
+  'validator.invalid_hook_event':
+    "settings.json에 잘못된 hook 이벤트 '{event}'. 유효한 이벤트: {valid}",
+  'validator.invalid_hook_structure':
+    "settings.json의 이벤트 '{event}'에 잘못된 hook 구조: {reason}",
 
-  // === Differ \uba54\uc2dc\uc9c0 ===
+  // === 표시 메시지 (doc-spec) ===
+  'display.doc_check_passed': 'Doc-spec 검증 통과.',
+  'display.doc_check_failed': 'Doc-spec 검증에서 {count}개 이슈 발견.',
+  'display.doc_check_skipped': 'Doc-spec 검증 건너뜀 (--no-doc-check).',
+
+  // === Differ 메시지 ===
   'differ.comparing': '\ube44\uad50: {a} \u2194 {b}',
   'differ.scale': '\uaddc\ubaa8: {a} \u2192 {b}',
   'differ.agents': '\uc5d0\uc774\uc804\ud2b8:',
@@ -183,6 +196,14 @@ export const ko: Messages = {
   'edit.save_and_scaffold': '\uc800\uc7a5 \ud6c4 \uc2a4\uce90\ud3f4\ub529',
   'edit.save_cancel': '\ucde8\uc18c',
   'edit.saved': '\uc124\uc815\uc774 \uc800\uc7a5\ub418\uc5c8\uc2b5\ub2c8\ub2e4.',
+
+  // === Sync-spec 메시지 ===
+  'display.sync_spec_fetching': 'Context7에서 공식 스펙을 가져오는 중...',
+  'display.sync_spec_library': '라이브러리 ID: {id}',
+  'display.sync_spec_fetched_at': '가져온 시각: {date}',
+  'display.sync_spec_no_diff': '번들 스펙이 공식 문서와 일치합니다.',
+  'display.sync_spec_diffs_found': '공식 문서와 {count}개 차이점 발견.',
+  'display.sync_spec_error': '스펙 동기화 실패: {message}',
 
   // === Runner \uba54\uc2dc\uc9c0 ===
   'runner.claude_not_found':
