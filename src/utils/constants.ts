@@ -24,6 +24,7 @@ export const SKILL_NAMES: readonly SkillName[] = [
   'ticket-writing',
   'design-system',
   'cr-process',
+  'sync-spec',
 ] as const;
 
 export const PRESET_NAMES = ['solo-dev', 'small-team', 'full-team'] as const;

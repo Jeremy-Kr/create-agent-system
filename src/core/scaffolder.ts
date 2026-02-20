@@ -14,7 +14,7 @@ import {
   SETTINGS_FILE,
 } from '../utils/constants.js';
 import { ensureDir, fileExists, writeFileSafe } from '../utils/fs.js';
-import type { DocSpec } from './doc-spec.js';
+import { BUNDLED_DOC_SPEC, type DocSpec } from './doc-spec.js';
 import type { DocSpecValidationResult } from './doc-spec-validator.js';
 import { validateDocSpec } from './doc-spec-validator.js';
 import { generateHooks } from './hooks-generator.js';
@@ -246,13 +246,7 @@ async function runDocSpecValidation(
   scale: 'small' | 'medium' | 'large',
   docSpec?: DocSpec,
 ): Promise<DocSpecValidationResult> {
-  let spec: DocSpec;
-  if (docSpec) {
-    spec = docSpec;
-  } else {
-    const { fetchDocSpec } = await import('./doc-spec-fetcher.js');
-    spec = await fetchDocSpec();
-  }
+  const spec = docSpec ?? BUNDLED_DOC_SPEC;
   const agentContents = renderedAgents
     .map(({ filePath, content }) => {
       const parsed = parseFrontmatterFromContent(content);

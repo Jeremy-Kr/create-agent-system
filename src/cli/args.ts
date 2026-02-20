@@ -7,16 +7,7 @@ import { isRegistryItemType } from '../types/registry.js';
 import { PRESET_NAMES } from '../utils/constants.js';
 
 export interface ParsedArgs {
-  command:
-    | 'scaffold'
-    | 'validate'
-    | 'diff'
-    | 'add'
-    | 'search'
-    | 'list'
-    | 'migrate'
-    | 'edit'
-    | 'sync-spec';
+  command: 'scaffold' | 'validate' | 'diff' | 'add' | 'search' | 'list' | 'migrate' | 'edit';
   preset?: PresetName;
   projectName?: string;
   target?: string;
@@ -57,8 +48,6 @@ function routeSubcommand(argv: string[]): ParsedArgs | null {
       return parseMigrateArgs(rest);
     case 'edit':
       return parseEditArgs(rest);
-    case 'sync-spec':
-      return { command: 'sync-spec' };
     default:
       return null;
   }

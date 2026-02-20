@@ -108,9 +108,7 @@ async function handleList(args: ParsedArgs, targetDir: string): Promise<never> {
 }
 
 async function handleValidate(args: ParsedArgs, targetDir: string): Promise<never> {
-  const { fetchDocSpec } = await import('./core/doc-spec-fetcher.js');
-  const docSpec = await fetchDocSpec();
-  const result = await validate(targetDir, docSpec);
+  const result = await validate(targetDir);
   if (!args.quiet || !result.valid || result.warnings.length > 0) {
     displayValidationResults(result);
   }
@@ -205,33 +203,6 @@ async function resolveFromConfigFile(
   return { preset, projectName, shouldRunClaude, basePresetName };
 }
 
-async function handleSyncSpec(): Promise<never> {
-  clack.intro(`create-agent-system v${VERSION}`);
-  const { syncSpec, formatSyncDiff } = await import('./core/doc-spec-sync.js');
-
-  clack.log.info(t('display.sync_spec_fetching'));
-
-  try {
-    const result = await syncSpec();
-    clack.log.info(t('display.sync_spec_library', { id: result.libraryId }));
-    clack.log.info(t('display.sync_spec_fetched_at', { date: result.fetchedAt }));
-
-    if (result.diffs.length === 0) {
-      clack.log.success(t('display.sync_spec_no_diff'));
-    } else {
-      clack.log.warn(t('display.sync_spec_diffs_found', { count: result.diffs.length }));
-      clack.log.message(formatSyncDiff(result.diffs));
-    }
-  } catch (error) {
-    clack.log.error(
-      t('display.sync_spec_error', { message: error instanceof Error ? error.message : 'Unknown' }),
-    );
-  }
-
-  clack.outro(t('display.done'));
-  process.exit(0);
-}
-
 async function handleScaffold(
   args: ParsedArgs,
   targetDir: string,
@@ -247,10 +218,6 @@ async function handleScaffold(
     clack.log.info(t('display.dry_run'));
   }
 
-  // Fetch DocSpec once and pass to both scaffold and validate
-  const { fetchDocSpec } = await import('./core/doc-spec-fetcher.js');
-  const docSpec = await fetchDocSpec();
-
   const result = await scaffold({
     preset,
     projectName,
@@ -259,7 +226,6 @@ async function handleScaffold(
     dryRun: args.dryRun,
     overwrite: args.overwrite,
     noDocCheck: args.noDocCheck,
-    docSpec,
   });
 
   displayResults(result.files, result.warnings);
@@ -277,7 +243,7 @@ async function handleScaffold(
   }
 
   if (!args.dryRun) {
-    const validationResult = await validate(targetDir, docSpec);
+    const validationResult = await validate(targetDir);
     displayValidationResults(validationResult);
   }
 
@@ -326,9 +292,6 @@ async function main() {
         await handleScaffold(args, targetDir, detectedTechStack);
         break;
       }
-      case 'sync-spec':
-        await handleSyncSpec();
-        break;
     }
   } catch (error) {
     if (error instanceof Error) {

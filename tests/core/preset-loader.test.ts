@@ -77,13 +77,14 @@ describe('Preset Loader (TICKET-004, TICKET-005)', () => {
       expect(preset.workflow.epicBased).toBe(false);
     });
 
-    it('should have 4 skills', async () => {
+    it('should have 5 skills', async () => {
       const preset = await loadPreset('solo-dev');
-      expect(preset.skills).toHaveLength(4);
+      expect(preset.skills).toHaveLength(5);
       expect(preset.skills).toContain('scoring');
       expect(preset.skills).toContain('tdd-workflow');
       expect(preset.skills).toContain('ticket-writing');
       expect(preset.skills).toContain('cr-process');
+      expect(preset.skills).toContain('sync-spec');
     });
 
     it('should have all agents defined (including disabled)', async () => {
@@ -114,9 +115,9 @@ describe('Preset Loader (TICKET-004, TICKET-005)', () => {
       expect(preset.workflow.epicBased).toBe(true);
     });
 
-    it('should have all 7 skills', async () => {
+    it('should have all 8 skills', async () => {
       const preset = await loadPreset('small-team');
-      expect(preset.skills).toHaveLength(7);
+      expect(preset.skills).toHaveLength(8);
     });
   });
 

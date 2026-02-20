@@ -1,0 +1,69 @@
+---
+name: sync-spec
+description: "Sync agent spec with official Claude Code docs via Context7. Use when checking if agent definitions match the latest official spec."
+---
+
+# Sync Spec — Official Doc Drift Detection
+
+This skill compares your project's agent system spec against the latest official Claude Code documentation.
+
+## Philosophy
+
+SSOT (Single Source of Truth) is the official Claude Code documentation only.
+This tool's bundled spec (`BUNDLED_DOC_SPEC`) is a verified snapshot — not the source of truth itself.
+
+## When to Use
+
+- After a Claude Code update to check for spec changes
+- When adding new agent frontmatter fields
+- When unsure if a field/model/hook is officially supported
+- Periodically (e.g., monthly) to catch drift
+
+## Procedure
+
+### 1. Fetch Official Spec via Context7
+
+Use Context7 MCP to query the latest Claude Code documentation:
+
+```
+resolve-library-id: "Claude Code"
+query-docs: topic="agent frontmatter fields configuration"
+query-docs: topic="hook events lifecycle"
+query-docs: topic="valid model values for agents"
+query-docs: topic="agent color configuration"
+query-docs: topic="permission mode values"
+```
+
+### 2. Read Current Bundled Spec
+
+Read `src/core/doc-spec.ts` and extract the `BUNDLED_DOC_SPEC` object.
+
+### 3. Compare Each Section
+
+| Section | What to Compare |
+|---------|----------------|
+| `agent.requiredFields` | Required frontmatter fields |
+| `agent.optionalFields` | Optional frontmatter fields |
+| `agent.validModels` | Valid model values |
+| `agent.validPermissionModes` | Valid permission modes |
+| `agent.validColors` | Valid color values |
+| `hooks.validEvents` | Official hook event names |
+| `hooks.hookTypes` | Hook action types (command, prompt, agent) |
+
+### 4. Report Differences
+
+For each section, report:
+- **Added**: In official docs but missing from bundled spec
+- **Removed**: In bundled spec but not in official docs
+- **Changed**: Value differs between official and bundled
+
+### 5. Update (with approval)
+
+If diffs are found, propose updates to `src/core/doc-spec.ts`.
+Always ask for human approval before modifying the file.
+
+## Important Notes
+
+- `hooks.extensionEvents` are NOT in official docs — they are this tool's extensions. Do not flag them as "removed".
+- `agent.toolsFormat` may differ: official docs may show array syntax while bundled says 'comma-separated' or vice versa.
+- When Context7 returns ambiguous results, flag them as "needs manual verification" rather than auto-updating.

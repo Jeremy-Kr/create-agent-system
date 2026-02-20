@@ -152,6 +152,7 @@ export const ko: Messages = {
   'skill.ticket_writing': '\uc720\uc800 \uc2a4\ud1a0\ub9ac \uae30\ubc18 \ud2f0\ucf13 \uc791\uc131',
   'skill.design_system': '\ub514\uc790\uc778 \uc2dc\uc2a4\ud15c \uad00\ub9ac',
   'skill.cr_process': '\ubcc0\uacbd \uc694\uccad \ud504\ub85c\uc138\uc2a4',
+  'skill.sync_spec': 'Context7 \uacf5\uc2dd \ubb38\uc11c \ub4dc\ub9ac\ud504\ud2b8 \uac10\uc9c0',
 
   // === \ud15c\ud50c\ub9bf \uc81c\ubaa9 ===
   'heading.project_memory': 'Project Memory',
@@ -196,14 +197,6 @@ export const ko: Messages = {
   'edit.save_and_scaffold': '\uc800\uc7a5 \ud6c4 \uc2a4\uce90\ud3f4\ub529',
   'edit.save_cancel': '\ucde8\uc18c',
   'edit.saved': '\uc124\uc815\uc774 \uc800\uc7a5\ub418\uc5c8\uc2b5\ub2c8\ub2e4.',
-
-  // === Sync-spec 메시지 ===
-  'display.sync_spec_fetching': 'Context7에서 공식 스펙을 가져오는 중...',
-  'display.sync_spec_library': '라이브러리 ID: {id}',
-  'display.sync_spec_fetched_at': '가져온 시각: {date}',
-  'display.sync_spec_no_diff': '번들 스펙이 공식 문서와 일치합니다.',
-  'display.sync_spec_diffs_found': '공식 문서와 {count}개 차이점 발견.',
-  'display.sync_spec_error': '스펙 동기화 실패: {message}',
 
   // === Runner \uba54\uc2dc\uc9c0 ===
   'runner.claude_not_found':

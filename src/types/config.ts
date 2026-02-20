@@ -46,4 +46,5 @@ export type SkillName =
   | 'adr-writing'
   | 'ticket-writing'
   | 'design-system'
-  | 'cr-process';
+  | 'cr-process'
+  | 'sync-spec';

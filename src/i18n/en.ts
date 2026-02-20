@@ -139,6 +139,7 @@ export const en: Messages = {
   'skill.ticket_writing': 'User story-based ticket writing',
   'skill.design_system': 'Design system management',
   'skill.cr_process': 'Change request process',
+  'skill.sync_spec': 'Official doc drift detection via Context7',
 
   // === Template headings ===
   'heading.project_memory': 'Project Memory',
@@ -178,14 +179,6 @@ export const en: Messages = {
   'edit.save_and_scaffold': 'Save and re-scaffold',
   'edit.save_cancel': 'Cancel',
   'edit.saved': 'Configuration saved.',
-
-  // === Sync-spec messages ===
-  'display.sync_spec_fetching': 'Fetching official spec from Context7...',
-  'display.sync_spec_library': 'Library ID: {id}',
-  'display.sync_spec_fetched_at': 'Fetched at: {date}',
-  'display.sync_spec_no_diff': 'Bundled spec is up-to-date with official docs.',
-  'display.sync_spec_diffs_found': 'Found {count} difference(s) with official docs.',
-  'display.sync_spec_error': 'Failed to sync spec: {message}',
 
   // === Runner messages ===
   'runner.claude_not_found':

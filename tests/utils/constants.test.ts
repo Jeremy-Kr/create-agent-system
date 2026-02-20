@@ -35,8 +35,8 @@ describe('Constants (TICKET-003)', () => {
   });
 
   describe('SKILL_NAMES', () => {
-    it('should have exactly 7 entries', () => {
-      expect(SKILL_NAMES).toHaveLength(7);
+    it('should have exactly 8 entries', () => {
+      expect(SKILL_NAMES).toHaveLength(8);
     });
 
     it('should contain all skill names', () => {
