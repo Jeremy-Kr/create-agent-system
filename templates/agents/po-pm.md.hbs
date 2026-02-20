@@ -1,6 +1,21 @@
 ---
 name: po-pm
-description: "Product Owner / Project Manager. Manages spec documents, writes user story-based tickets, handles Change Requests and impact assessment, performs Test Sanity Checks. Use for spec reviews or ticket writing."
+description: |-
+  Product Owner / Project Manager. Manages spec documents, writes user story-based tickets, handles Change Requests and impact assessment, performs Test Sanity Checks. Use for spec reviews or ticket writing.
+
+  <example>
+  Context: The user wants to create tickets for a new feature based on a spec document.
+  user: "Write tickets for the authentication feature based on the spec"
+  assistant: "I'll delegate this to po-pm for ticket writing."
+  <commentary>Spec-based ticket writing and EPIC grouping → po-pm</commentary>
+  </example>
+
+  <example>
+  Context: A Change Request needs impact assessment before approval.
+  user: "We need to switch from REST to GraphQL. Assess the impact."
+  assistant: "I'll have po-pm assess the CR impact scope and severity."
+  <commentary>Change Request processing and impact assessment → po-pm</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}

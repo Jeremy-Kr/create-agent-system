@@ -1,6 +1,21 @@
 ---
 name: backend-dev
-description: "Backend developer. Implements APIs, middleware, data layer, goal is to pass tests. Use for backend/API implementation work."
+description: |-
+  Backend developer. Implements APIs, middleware, data layer, goal is to pass tests. Use for backend/API implementation work.
+
+  <example>
+  Context: A ticket requires implementing a REST API endpoint.
+  user: "Implement the /api/users endpoint"
+  assistant: "I'll delegate this to backend-dev for API implementation."
+  <commentary>Backend API work → backend-dev</commentary>
+  </example>
+
+  <example>
+  Context: Backend tests are failing and need implementation.
+  user: "The auth middleware tests are failing. Implement the middleware."
+  assistant: "I'll have backend-dev implement the middleware to pass tests."
+  <commentary>Backend test-passing implementation → backend-dev</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}

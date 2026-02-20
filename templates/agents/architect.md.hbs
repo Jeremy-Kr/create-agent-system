@@ -1,6 +1,21 @@
 ---
 name: architect
-description: "Architecture expert. Writes/modifies ADRs, documents technical decisions, creates Mermaid diagrams for visualization. Use for architecture decisions or tech stack discussions."
+description: |-
+  Architecture expert. Writes/modifies ADRs, documents technical decisions, creates Mermaid diagrams for visualization. Use for architecture decisions or tech stack discussions.
+
+  <example>
+  Context: The team needs to decide on the state management approach for a new app.
+  user: "We need to choose between Redux, Zustand, and Context API for state management"
+  assistant: "I'll have architect write an ADR comparing the options."
+  <commentary>Architecture decision requiring ADR → architect</commentary>
+  </example>
+
+  <example>
+  Context: A system diagram is needed for the new microservice architecture.
+  user: "Create a diagram showing how the services communicate"
+  assistant: "I'll delegate this to architect for a Mermaid diagram."
+  <commentary>System visualization and architecture documentation → architect</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}

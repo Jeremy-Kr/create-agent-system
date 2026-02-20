@@ -1,6 +1,21 @@
 ---
 name: frontend-dev
-description: "Frontend developer. Implements React/Next.js components, goal is to pass tests. Use for frontend implementation work."
+description: |-
+  Frontend developer. Implements React/Next.js components, goal is to pass tests. Use for frontend implementation work.
+
+  <example>
+  Context: A ticket requires implementing a new UI component.
+  user: "Implement the user profile card component"
+  assistant: "I'll delegate this to frontend-dev for React implementation."
+  <commentary>Frontend component implementation → frontend-dev</commentary>
+  </example>
+
+  <example>
+  Context: Frontend tests are failing and need implementation fixes.
+  user: "The dashboard page tests are failing. Fix the implementation."
+  assistant: "I'll have frontend-dev fix the implementation to pass tests."
+  <commentary>Frontend test-passing implementation → frontend-dev</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}

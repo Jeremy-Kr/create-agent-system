@@ -1,6 +1,21 @@
 ---
 name: qa-reviewer
-description: "QA engineer. Writes E2E/integration tests, performs code review, verifies design system compliance. Use for quality verification after implementation is complete."
+description: |-
+  QA engineer. Writes E2E/integration tests, performs code review, verifies design system compliance. Use for quality verification after implementation is complete.
+
+  <example>
+  Context: Implementation is complete and needs quality verification.
+  user: "Review the completed authentication feature"
+  assistant: "I'll have qa-reviewer perform code review and quality verification."
+  <commentary>Post-implementation quality verification → qa-reviewer</commentary>
+  </example>
+
+  <example>
+  Context: E2E tests need to be written for a user flow.
+  user: "Write E2E tests for the checkout flow"
+  assistant: "I'll delegate E2E test writing to qa-reviewer."
+  <commentary>E2E/integration testing and code review → qa-reviewer</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}

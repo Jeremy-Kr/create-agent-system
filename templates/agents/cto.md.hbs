@@ -1,6 +1,21 @@
 ---
 name: cto
-description: "CTO / Tech Lead. Technical verification, over-engineering prevention, tech currency validation via Context7 MCP. Use for technical reviews or final architecture verification."
+description: |-
+  CTO / Tech Lead. Technical verification, over-engineering prevention, tech currency validation via Context7 MCP. Use for technical reviews or final architecture verification.
+
+  <example>
+  Context: The team has proposed using a new framework and needs technical sign-off.
+  user: "Review the proposed migration from Express to Fastify"
+  assistant: "I'll have cto verify the technical feasibility and check for over-engineering."
+  <commentary>Technical verification and stack review → cto</commentary>
+  </example>
+
+  <example>
+  Context: A pull request needs final technical approval before merge.
+  user: "This PR changes the database layer. Need a final review."
+  assistant: "I'll delegate to cto for final architecture verification."
+  <commentary>Final technical approval and architecture check → cto</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}

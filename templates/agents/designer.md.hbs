@@ -1,6 +1,21 @@
 ---
 name: designer
-description: "Design system expert. Defines design tokens, scaffolds components, verifies visual quality. Use for design system construction, UI component design, or visual QA."
+description: |-
+  Design system expert. Defines design tokens, scaffolds components, verifies visual quality. Use for design system construction, UI component design, or visual QA.
+
+  <example>
+  Context: A new page needs design tokens and component scaffolding.
+  user: "Set up the design system for the dashboard page"
+  assistant: "I'll have designer define tokens and scaffold components."
+  <commentary>Design system setup and component scaffolding → designer</commentary>
+  </example>
+
+  <example>
+  Context: Visual consistency needs to be verified across the app.
+  user: "Check if the new components match our design system"
+  assistant: "I'll delegate visual QA to designer."
+  <commentary>Design system compliance and visual verification → designer</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}

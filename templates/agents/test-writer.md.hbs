@@ -1,6 +1,21 @@
 ---
 name: test-writer
-description: "TDD specialist. Writes tests BEFORE implementation. Covers unit tests and component tests. Use for test writing or TDD-related work."
+description: |-
+  TDD specialist. Writes tests BEFORE implementation. Covers unit tests and component tests. Use for test writing or TDD-related work.
+
+  <example>
+  Context: A new feature ticket needs test cases written before implementation.
+  user: "Write tests for the user authentication feature"
+  assistant: "I'll have test-writer create test cases based on the ticket acceptance criteria."
+  <commentary>Test-first development and TDD → test-writer</commentary>
+  </example>
+
+  <example>
+  Context: Existing tests need to be updated for a refactored module.
+  user: "Update tests for the refactored payment module"
+  assistant: "I'll delegate test updates to test-writer."
+  <commentary>Test maintenance and coverage → test-writer</commentary>
+  </example>
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: {{model}}
 {{#if skills}}skills: {{skills}}{{/if}}
