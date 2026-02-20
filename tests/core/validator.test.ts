@@ -2,6 +2,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { BUNDLED_DOC_SPEC, type DocSpec } from '../../src/core/doc-spec.js';
 import { validate } from '../../src/core/validator.js';
 
 describe('Validator (TICKET-013)', () => {
@@ -28,15 +29,7 @@ describe('Validator (TICKET-013)', () => {
 
     await writeFile(
       join(agentsDir, 'backend-dev.md'),
-      `---
-name: backend-dev
-description: "Backend developer. Implements APIs and services."
-tools: Read, Write, Edit, Grep, Glob, Bash
-model: opus
----
-
-You are a backend developer.
-`,
+      '---\nname: backend-dev\ndescription: "Backend developer. Implements APIs and services. <example>Context: Test. user: Implement API. assistant: Delegating.</example>"\ntools: Read, Write, Edit, Grep, Glob, Bash\nmodel: opus\nskills: scoring\n---\n\nYou are a backend developer.\n',
       'utf-8',
     );
 
@@ -490,6 +483,49 @@ Body.
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.warnings.length).toBeGreaterThan(0);
       expect(result.valid).toBe(false); // has errors
+    });
+  });
+
+  // --- DocSpec parameter ---
+
+  describe('DocSpec parameter', () => {
+    it('should use BUNDLED_DOC_SPEC by default (color field is supported)', async () => {
+      await setupValidSystem();
+      await writeFile(
+        join(targetDir, '.claude', 'agents', 'colored.md'),
+        `---
+name: colored
+description: "Agent with color field, should be supported"
+tools: Read, Write
+model: opus
+color: blue
+---
+Body.
+`,
+        'utf-8',
+      );
+      const result = await validate(targetDir);
+      const unsupported = result.errors.filter(
+        (e) => e.rule === 'UNSUPPORTED_FIELD' && e.file.includes('colored.md'),
+      );
+      expect(unsupported).toHaveLength(0);
+    });
+
+    it('should validate against custom spec when provided', async () => {
+      await setupValidSystem();
+      // Custom spec that only supports name and description
+      const customSpec: DocSpec = {
+        ...BUNDLED_DOC_SPEC,
+        agent: {
+          ...BUNDLED_DOC_SPEC.agent,
+          requiredFields: ['name', 'description'],
+          optionalFields: ['tools'], // Only tools is optional
+        },
+      };
+      const result = await validate(targetDir, customSpec);
+      // backend-dev.md has model, skills fields which are not in customSpec
+      const unsupported = result.errors.filter((e) => e.rule === 'UNSUPPORTED_FIELD');
+      expect(unsupported.length).toBeGreaterThan(0);
     });
   });
 });

@@ -2,8 +2,9 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { t } from '../i18n/index.js';
-import { SUPPORTED_FRONTMATTER_FIELDS, VALID_MODEL_VALUES } from '../utils/constants.js';
+import { SETTINGS_FILE } from '../utils/constants.js';
 import { dirExists, fileExists } from '../utils/fs.js';
+import { BUNDLED_DOC_SPEC, type DocSpec } from './doc-spec.js';
 
 export interface ValidationIssue {
   rule: string;
@@ -19,6 +20,22 @@ export interface ValidationResult {
     agentCount: number;
     skillCount: number;
     fileCount: number;
+  };
+}
+
+interface ValidatorContext {
+  supportedFields: string[];
+  validModels: string[];
+  validPermissionModes: string[];
+  validHookEvents: string[];
+}
+
+function createValidatorContext(spec: DocSpec): ValidatorContext {
+  return {
+    supportedFields: [...spec.agent.requiredFields, ...spec.agent.optionalFields],
+    validModels: spec.agent.validModels,
+    validPermissionModes: spec.agent.validPermissionModes,
+    validHookEvents: [...spec.hooks.validEvents, ...(spec.hooks.extensionEvents ?? [])],
   };
 }
 
@@ -97,33 +114,41 @@ function checkMissingDescription(
   return null;
 }
 
-function checkUnsupportedFields(relPath: string, data: Record<string, unknown>): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
+function checkUnsupportedFields(
+  relPath: string,
+  data: Record<string, unknown>,
+  supportedFields: string[],
+): ValidationIssue[] {
+  const errors: ValidationIssue[] = [];
   for (const key of Object.keys(data)) {
-    if (!(SUPPORTED_FRONTMATTER_FIELDS as readonly string[]).includes(key)) {
-      issues.push({
+    if (!supportedFields.includes(key)) {
+      errors.push({
         rule: 'UNSUPPORTED_FIELD',
         file: relPath,
         message: t('validator.unsupported_field', {
           file: relPath,
           field: key,
-          supported: SUPPORTED_FRONTMATTER_FIELDS.join(', '),
+          supported: supportedFields.join(', '),
         }),
       });
     }
   }
-  return issues;
+  return errors;
 }
 
-function checkInvalidModel(relPath: string, data: Record<string, unknown>): ValidationIssue | null {
-  if (data.model && !(VALID_MODEL_VALUES as readonly string[]).includes(data.model as string)) {
+function checkInvalidModel(
+  relPath: string,
+  data: Record<string, unknown>,
+  validModels: string[],
+): ValidationIssue | null {
+  if (data.model && !validModels.includes(data.model as string)) {
     return {
       rule: 'INVALID_MODEL',
       file: relPath,
       message: t('validator.invalid_model', {
         file: relPath,
         model: String(data.model),
-        valid: VALID_MODEL_VALUES.join(', '),
+        valid: validModels.join(', '),
       }),
     };
   }
@@ -194,6 +219,40 @@ function checkMissingTools(relPath: string, data: Record<string, unknown>): Vali
   return null;
 }
 
+function checkInvalidPermissionMode(
+  relPath: string,
+  data: Record<string, unknown>,
+  validPermissionModes: string[],
+): ValidationIssue | null {
+  if (data.permissionMode && !validPermissionModes.includes(data.permissionMode as string)) {
+    return {
+      rule: 'INVALID_PERMISSION_MODE',
+      file: relPath,
+      message: t('validator.invalid_permission_mode', {
+        file: relPath,
+        mode: String(data.permissionMode),
+        valid: validPermissionModes.join(', '),
+      }),
+    };
+  }
+  return null;
+}
+
+function checkMissingExampleBlocks(
+  relPath: string,
+  data: Record<string, unknown>,
+): ValidationIssue | null {
+  const desc = data.description as string | undefined;
+  if (desc && !desc.includes('<example>')) {
+    return {
+      rule: 'MISSING_EXAMPLE_BLOCKS',
+      file: relPath,
+      message: t('validator.missing_example_blocks', { file: relPath }),
+    };
+  }
+  return null;
+}
+
 function checkDuplicateContent(relPath: string, body: string): ValidationIssue | null {
   for (const keyword of DUPLICATE_CONTENT_KEYWORDS) {
     if (body.includes(keyword)) {
@@ -205,6 +264,39 @@ function checkDuplicateContent(relPath: string, body: string): ValidationIssue |
     }
   }
   return null;
+}
+
+function checkHooksStructure(
+  hooks: Record<string, unknown>,
+  validHookEvents: string[],
+): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  for (const event of Object.keys(hooks)) {
+    if (!validHookEvents.includes(event)) {
+      issues.push({
+        rule: 'INVALID_HOOK_EVENT',
+        file: SETTINGS_FILE,
+        message: t('validator.invalid_hook_event', {
+          event,
+          valid: validHookEvents.join(', '),
+        }),
+      });
+      continue;
+    }
+
+    const entries = hooks[event];
+    if (!Array.isArray(entries)) {
+      issues.push({
+        rule: 'INVALID_HOOK_STRUCTURE',
+        file: SETTINGS_FILE,
+        message: t('validator.invalid_hook_structure', {
+          event,
+          reason: 'entries must be an array',
+        }),
+      });
+    }
+  }
+  return issues;
 }
 
 function extractImportPaths(content: string): string[] {
@@ -275,6 +367,7 @@ async function validateAgentFile(
   relPath: string,
   content: string,
   skillsDir: string,
+  ctx: ValidatorContext,
 ): Promise<{ errors: ValidationIssue[]; warnings: ValidationIssue[] }> {
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
@@ -291,9 +384,11 @@ async function validateAgentFile(
   if (nameIssue) errors.push(nameIssue);
   const descIssue = checkMissingDescription(relPath, data);
   if (descIssue) errors.push(descIssue);
-  errors.push(...checkUnsupportedFields(relPath, data));
-  const modelIssue = checkInvalidModel(relPath, data);
+  errors.push(...checkUnsupportedFields(relPath, data, ctx.supportedFields));
+  const modelIssue = checkInvalidModel(relPath, data, ctx.validModels);
   if (modelIssue) errors.push(modelIssue);
+  const permissionModeIssue = checkInvalidPermissionMode(relPath, data, ctx.validPermissionModes);
+  if (permissionModeIssue) errors.push(permissionModeIssue);
   errors.push(...(await checkInvalidSkillRef(relPath, data, skillsDir)));
 
   // Warning rules
@@ -305,11 +400,14 @@ async function validateAgentFile(
   if (missingTools) warnings.push(missingTools);
   const duplicateContent = checkDuplicateContent(relPath, body);
   if (duplicateContent) warnings.push(duplicateContent);
+  const missingExamples = checkMissingExampleBlocks(relPath, data);
+  if (missingExamples) warnings.push(missingExamples);
 
   return { errors, warnings };
 }
 
-export async function validate(targetDir: string): Promise<ValidationResult> {
+export async function validate(targetDir: string, spec?: DocSpec): Promise<ValidationResult> {
+  const ctx = createValidatorContext(spec ?? BUNDLED_DOC_SPEC);
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
 
@@ -345,7 +443,7 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
   );
 
   for (const { relPath, content } of agentContents) {
-    const result = await validateAgentFile(relPath, content, skillsDir);
+    const result = await validateAgentFile(relPath, content, skillsDir, ctx);
     errors.push(...result.errors);
     warnings.push(...result.warnings);
   }
@@ -353,6 +451,23 @@ export async function validate(targetDir: string): Promise<ValidationResult> {
   // 4. CLAUDE.md import paths
   const claudeMdContent = await readFile(claudeMdPath, 'utf-8');
   errors.push(...(await checkImportPaths(claudeMdContent, targetDir)));
+
+  // 5. Hooks structure in settings.json
+  const settingsPath = join(targetDir, SETTINGS_FILE);
+  if (await fileExists(settingsPath)) {
+    try {
+      const settingsContent = JSON.parse(await readFile(settingsPath, 'utf-8'));
+      if (settingsContent.hooks && typeof settingsContent.hooks === 'object') {
+        const hookWarnings = checkHooksStructure(
+          settingsContent.hooks as Record<string, unknown>,
+          ctx.validHookEvents,
+        );
+        warnings.push(...hookWarnings);
+      }
+    } catch {
+      // settings.json parse error — not our concern here
+    }
+  }
 
   return {
     valid: errors.length === 0,
