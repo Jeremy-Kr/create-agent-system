@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { parse as parseYaml } from 'yaml';
 import { t } from '../i18n/index.js';
 import type { AgentName, SkillName, TechStackInfo } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
@@ -13,6 +14,10 @@ import {
   SETTINGS_FILE,
 } from '../utils/constants.js';
 import { ensureDir, fileExists, writeFileSafe } from '../utils/fs.js';
+import type { DocSpec } from './doc-spec.js';
+import type { DocSpecValidationResult } from './doc-spec-validator.js';
+import { validateDocSpec } from './doc-spec-validator.js';
+import { generateHooks } from './hooks-generator.js';
 import type { SkillInstallResult } from './skill-installer.js';
 import { installSkills } from './skill-installer.js';
 import type { AgentTemplateData, ClaudeMdTemplateData } from './template-renderer.js';
@@ -25,12 +30,15 @@ export interface ScaffoldConfig {
   techStack: TechStackInfo;
   dryRun?: boolean;
   overwrite?: boolean;
+  noDocCheck?: boolean;
+  docSpec?: DocSpec;
 }
 
 export interface ScaffoldResult {
   files: Array<{ path: string; action: 'created' | 'skipped' | 'overwritten' }>;
   skills: SkillInstallResult[];
   warnings: string[];
+  docSpecResult?: DocSpecValidationResult;
 }
 
 export function computeAgentSkills(agentName: AgentName, presetSkills: SkillName[]): SkillName[] {
@@ -64,7 +72,7 @@ export function composeClaudeMdData(
 ): ClaudeMdTemplateData {
   const packageManager = techStack.packageManager ?? 'pnpm';
   const enabledAgents = Object.entries(preset.agents)
-    .filter(([_, config]) => config.enabled)
+    .filter(([_, agentConfig]) => agentConfig.enabled)
     .map(([name]) => name as AgentName);
 
   return {
@@ -97,24 +105,53 @@ export function composeClaudeMdData(
   };
 }
 
-async function writeAgentFiles(
+interface RenderedAgent {
+  agentName: AgentName;
+  filePath: string;
+  content: string;
+}
+
+async function renderAgentsToMemory(
   enabledAgents: AgentName[],
   targetDir: string,
   preset: Preset,
   techStack: TechStackInfo,
+): Promise<RenderedAgent[]> {
+  const agents: RenderedAgent[] = [];
+  for (const agentName of enabledAgents) {
+    const filePath = join(targetDir, AGENTS_DIR, `${agentName}.md`);
+    const templateData = composeAgentTemplateData(agentName, preset, techStack);
+    const content = await renderAgentTemplate(agentName, templateData);
+    agents.push({ agentName, filePath, content });
+  }
+  return agents;
+}
+
+function parseFrontmatterFromContent(
+  content: string,
+): { data: Record<string, unknown>; body: string } | null {
+  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) return null;
+  try {
+    const data = parseYaml(match[1]) as Record<string, unknown>;
+    return { data, body: match[2] };
+  } catch {
+    return null;
+  }
+}
+
+async function writeRenderedAgents(
+  agents: RenderedAgent[],
   dryRun: boolean | undefined,
   overwrite: boolean | undefined,
 ): Promise<ScaffoldResult['files']> {
   const files: ScaffoldResult['files'] = [];
-  for (const agentName of enabledAgents) {
-    const filePath = join(targetDir, AGENTS_DIR, `${agentName}.md`);
+  for (const { filePath, content } of agents) {
     if (dryRun) {
       files.push({ path: filePath, action: 'created' });
       continue;
     }
-    const templateData = composeAgentTemplateData(agentName, preset, techStack);
-    const rendered = await renderAgentTemplate(agentName, templateData);
-    const { skipped, existed } = await writeFileSafe(filePath, rendered, overwrite);
+    const { skipped, existed } = await writeFileSafe(filePath, content, overwrite);
     if (skipped) {
       files.push({ path: filePath, action: 'skipped' });
     } else {
@@ -153,6 +190,7 @@ async function writeClaudeMdFile(
 
 async function mergeSettingsJson(
   targetDir: string,
+  preset: Preset,
   dryRun: boolean | undefined,
 ): Promise<ScaffoldResult['files']> {
   const settingsPath = join(targetDir, SETTINGS_FILE);
@@ -168,17 +206,72 @@ async function mergeSettingsJson(
       // If existing settings.json is malformed, start fresh
     }
   }
-  const mergedSettings = { ...existingSettings, agentTeams: { enabled: true } };
+
+  // Merge hooks: generated hooks take priority, preserve existing for other events
+  const existingHooks = (existingSettings.hooks ?? {}) as Record<string, unknown>;
+  const mergedHooks = { ...existingHooks, ...generateHooks(preset.scale) };
+
+  const mergedSettings = {
+    ...existingSettings,
+    env: {
+      ...((existingSettings.env as Record<string, string>) ?? {}),
+      CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: '1',
+    },
+    hooks: mergedHooks,
+  };
+  // Remove legacy agentTeams key if present
+  delete (mergedSettings as Record<string, unknown>).agentTeams;
   await writeFile(settingsPath, JSON.stringify(mergedSettings, null, 2), 'utf-8');
   return [{ path: settingsPath, action: 'created' }];
 }
 
+async function installSkillsWithWarnings(
+  skills: SkillName[],
+  targetDir: string,
+  warnings: string[],
+): Promise<SkillInstallResult[]> {
+  const results = await installSkills(skills, targetDir);
+  for (const sr of results) {
+    if (!sr.success) {
+      warnings.push(
+        `Skill "${sr.skillName}" installation failed: ${sr.error ?? 'unknown error'}. Install manually with: npx @anthropic/skills add ${sr.skillName}`,
+      );
+    }
+  }
+  return results;
+}
+
+async function runDocSpecValidation(
+  renderedAgents: { filePath: string; content: string }[],
+  scale: 'small' | 'medium' | 'large',
+  docSpec?: DocSpec,
+): Promise<DocSpecValidationResult> {
+  let spec: DocSpec;
+  if (docSpec) {
+    spec = docSpec;
+  } else {
+    const { fetchDocSpec } = await import('./doc-spec-fetcher.js');
+    spec = await fetchDocSpec();
+  }
+  const agentContents = renderedAgents
+    .map(({ filePath, content }) => {
+      const parsed = parseFrontmatterFromContent(content);
+      if (!parsed) return null;
+      return { filePath, frontmatter: parsed.data, body: parsed.body };
+    })
+    .filter((a): a is NonNullable<typeof a> => a !== null);
+
+  const hooks = generateHooks(scale);
+  return validateDocSpec(agentContents, hooks as unknown as Record<string, unknown>, spec);
+}
+
 export async function scaffold(config: ScaffoldConfig): Promise<ScaffoldResult> {
-  const { preset, projectName, targetDir, techStack, dryRun, overwrite } = config;
+  const { preset, projectName, targetDir, techStack, dryRun, overwrite, noDocCheck, docSpec } =
+    config;
   const result: ScaffoldResult = { files: [], skills: [], warnings: [] };
 
   const enabledAgents = Object.entries(preset.agents)
-    .filter(([_, config]) => config.enabled)
+    .filter(([_, agentConfig]) => agentConfig.enabled)
     .map(([name]) => name as AgentName);
 
   // 1. Create directories
@@ -186,12 +279,30 @@ export async function scaffold(config: ScaffoldConfig): Promise<ScaffoldResult> 
     await ensureDir(join(targetDir, AGENTS_DIR));
   }
 
-  // 2. Agent files
-  result.files.push(
-    ...(await writeAgentFiles(enabledAgents, targetDir, preset, techStack, dryRun, overwrite)),
-  );
+  // 2. Render agent templates to memory
+  const renderedAgents = dryRun
+    ? []
+    : await renderAgentsToMemory(enabledAgents, targetDir, preset, techStack);
 
-  // 3. CLAUDE.md
+  // 3. Doc-spec validation (pre-write)
+  if (!noDocCheck && !dryRun && renderedAgents.length > 0) {
+    const docSpecResult = await runDocSpecValidation(renderedAgents, preset.scale, docSpec);
+    result.docSpecResult = docSpecResult;
+    for (const issue of docSpecResult.issues) {
+      result.warnings.push(`[doc-spec] ${issue.message}`);
+    }
+  }
+
+  // 4. Write agent files
+  const agentFiles = dryRun
+    ? enabledAgents.map((name) => ({
+        path: join(targetDir, AGENTS_DIR, `${name}.md`),
+        action: 'created' as const,
+      }))
+    : await writeRenderedAgents(renderedAgents, dryRun, overwrite);
+  result.files.push(...agentFiles);
+
+  // 5. CLAUDE.md
   const claudeMd = await writeClaudeMdFile(
     targetDir,
     preset,
@@ -203,21 +314,13 @@ export async function scaffold(config: ScaffoldConfig): Promise<ScaffoldResult> 
   result.files.push(...claudeMd.files);
   result.warnings.push(...claudeMd.warnings);
 
-  // 4. Skills
+  // 6. Skills
   if (!dryRun) {
-    const skillResults = await installSkills(preset.skills, targetDir);
-    result.skills = skillResults;
-    for (const sr of skillResults) {
-      if (!sr.success) {
-        result.warnings.push(
-          `Skill "${sr.skillName}" installation failed: ${sr.error ?? 'unknown error'}. Install manually with: npx @anthropic/skills add ${sr.skillName}`,
-        );
-      }
-    }
+    result.skills = await installSkillsWithWarnings(preset.skills, targetDir, result.warnings);
   }
 
-  // 5. settings.json
-  result.files.push(...(await mergeSettingsJson(targetDir, dryRun)));
+  // 7. settings.json (with hooks)
+  result.files.push(...(await mergeSettingsJson(targetDir, preset, dryRun)));
 
   return result;
 }

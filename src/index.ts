@@ -108,7 +108,9 @@ async function handleList(args: ParsedArgs, targetDir: string): Promise<never> {
 }
 
 async function handleValidate(args: ParsedArgs, targetDir: string): Promise<never> {
-  const result = await validate(targetDir);
+  const { fetchDocSpec } = await import('./core/doc-spec-fetcher.js');
+  const docSpec = await fetchDocSpec();
+  const result = await validate(targetDir, docSpec);
   if (!args.quiet || !result.valid || result.warnings.length > 0) {
     displayValidationResults(result);
   }
@@ -178,9 +180,7 @@ async function resolveFromConfigFile(
   configDir: string,
   techStack: TechStackInfo,
 ): Promise<ResolvedPreset> {
-  const loaded = await loadConfigFile(configDir);
-  const { preset } = loaded;
-  const { projectName } = loaded;
+  const { preset, projectName } = await loadConfigFile(configDir);
   let shouldRunClaude = false;
   const basePresetName = preset.name !== 'custom' ? preset.name : undefined;
 
@@ -205,6 +205,33 @@ async function resolveFromConfigFile(
   return { preset, projectName, shouldRunClaude, basePresetName };
 }
 
+async function handleSyncSpec(): Promise<never> {
+  clack.intro(`create-agent-system v${VERSION}`);
+  const { syncSpec, formatSyncDiff } = await import('./core/doc-spec-sync.js');
+
+  clack.log.info(t('display.sync_spec_fetching'));
+
+  try {
+    const result = await syncSpec();
+    clack.log.info(t('display.sync_spec_library', { id: result.libraryId }));
+    clack.log.info(t('display.sync_spec_fetched_at', { date: result.fetchedAt }));
+
+    if (result.diffs.length === 0) {
+      clack.log.success(t('display.sync_spec_no_diff'));
+    } else {
+      clack.log.warn(t('display.sync_spec_diffs_found', { count: result.diffs.length }));
+      clack.log.message(formatSyncDiff(result.diffs));
+    }
+  } catch (error) {
+    clack.log.error(
+      t('display.sync_spec_error', { message: error instanceof Error ? error.message : 'Unknown' }),
+    );
+  }
+
+  clack.outro(t('display.done'));
+  process.exit(0);
+}
+
 async function handleScaffold(
   args: ParsedArgs,
   targetDir: string,
@@ -220,6 +247,10 @@ async function handleScaffold(
     clack.log.info(t('display.dry_run'));
   }
 
+  // Fetch DocSpec once and pass to both scaffold and validate
+  const { fetchDocSpec } = await import('./core/doc-spec-fetcher.js');
+  const docSpec = await fetchDocSpec();
+
   const result = await scaffold({
     preset,
     projectName,
@@ -227,12 +258,26 @@ async function handleScaffold(
     techStack,
     dryRun: args.dryRun,
     overwrite: args.overwrite,
+    noDocCheck: args.noDocCheck,
+    docSpec,
   });
 
   displayResults(result.files, result.warnings);
 
+  // Doc-spec results
+  if (result.docSpecResult) {
+    const issueCount = result.docSpecResult.issues.length;
+    if (issueCount === 0) {
+      clack.log.success(t('display.doc_check_passed'));
+    } else {
+      clack.log.warn(t('display.doc_check_failed', { count: issueCount }));
+    }
+  } else if (args.noDocCheck) {
+    clack.log.info(t('display.doc_check_skipped'));
+  }
+
   if (!args.dryRun) {
-    const validationResult = await validate(targetDir);
+    const validationResult = await validate(targetDir, docSpec);
     displayValidationResults(validationResult);
   }
 
@@ -254,16 +299,37 @@ async function main() {
     initI18n(args.lang ?? detectSystemLocale());
     const targetDir = args.target ?? resolve('.');
 
-    if (args.command === 'validate') await handleValidate(args, targetDir);
-    if (args.command === 'diff') await handleDiff(args);
-    if (args.command === 'migrate') await handleMigrate(args, targetDir);
-    if (args.command === 'edit') await handleEdit(args, targetDir);
-    if (args.command === 'add') await handleAdd(args, targetDir);
-    if (args.command === 'search') await handleSearch(args);
-    if (args.command === 'list') await handleList(args, targetDir);
-
-    const detectedTechStack = await detectTechStack(targetDir);
-    await handleScaffold(args, targetDir, detectedTechStack);
+    switch (args.command) {
+      case 'validate':
+        await handleValidate(args, targetDir);
+        break;
+      case 'diff':
+        await handleDiff(args);
+        break;
+      case 'migrate':
+        await handleMigrate(args, targetDir);
+        break;
+      case 'edit':
+        await handleEdit(args, targetDir);
+        break;
+      case 'add':
+        await handleAdd(args, targetDir);
+        break;
+      case 'search':
+        await handleSearch(args);
+        break;
+      case 'list':
+        await handleList(args, targetDir);
+        break;
+      case 'scaffold': {
+        const detectedTechStack = await detectTechStack(targetDir);
+        await handleScaffold(args, targetDir, detectedTechStack);
+        break;
+      }
+      case 'sync-spec':
+        await handleSyncSpec();
+        break;
+    }
   } catch (error) {
     if (error instanceof Error) {
       clack.log.error(error.message);

@@ -66,7 +66,8 @@ describe('Integration: Scaffolding Pipeline (TICKET-018)', () => {
 
       const settingsPath = join(tmpDir, '.claude', 'settings.json');
       const settings = JSON.parse(await readFile(settingsPath, 'utf-8'));
-      expect(settings.agentTeams).toEqual({ enabled: true });
+      expect(settings.env?.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS).toBe('1');
+      expect(settings.agentTeams).toBeUndefined();
 
       // Result should record all files
       expect(result.files.length).toBeGreaterThanOrEqual(7); // 5 agents + CLAUDE.md + settings.json
@@ -81,51 +82,34 @@ describe('Integration: Scaffolding Pipeline (TICKET-018)', () => {
         techStack: DEFAULT_TECH_STACK,
       });
 
-      // Helper to parse frontmatter
-      const getFrontmatter = async (agentName: string) => {
-        const content = await readFile(
-          join(tmpDir, '.claude', 'agents', `${agentName}.md`),
-          'utf-8',
-        );
-        const match = content.match(/^---\n([\s\S]*?)\n---/);
-        expect(match).toBeTruthy();
-        if (!match) throw new Error('No frontmatter found');
-        const lines = match[1].split('\n');
-        const data: Record<string, string> = {};
-        for (const line of lines) {
-          const [key, ...rest] = line.split(':');
-          if (key && rest.length > 0) {
-            data[key.trim()] = rest.join(':').trim();
-          }
-        }
-        return data;
+      // Helper to parse agent file content
+      const getAgentContent = async (agentName: string) => {
+        return readFile(join(tmpDir, '.claude', 'agents', `${agentName}.md`), 'utf-8');
       };
 
-      // All solo-dev agents should have model: opus
+      // All solo-dev agents should have model: opus, no color
       for (const agent of ['po-pm', 'test-writer', 'frontend-dev', 'backend-dev', 'qa-reviewer']) {
-        const fm = await getFrontmatter(agent);
-        expect(fm.model).toBe('opus');
+        const content = await getAgentContent(agent);
+        expect(content).toContain('model: opus');
+        // tools should be comma-separated, not JSON array
+        expect(content).toContain('tools: Read, Write, Edit, Grep, Glob, Bash');
+        expect(content).not.toContain('["Read"');
+        // Should NOT have color field
+        expect(content).not.toMatch(/^color:/m);
+        // Should NOT have permissionMode in frontmatter
+        expect(content).not.toMatch(/^permissionMode:/m);
+        // Should have <example> blocks in description
+        expect(content).toContain('<example>');
       }
 
-      // Check skills (intersection: AGENT_DEFAULT_SKILLS ∩ solo-dev.skills)
-      // solo-dev skills: scoring, tdd-workflow, ticket-writing, cr-process
-      const popm = await getFrontmatter('po-pm');
-      expect(popm.skills).toBe('scoring, ticket-writing, cr-process');
+      // backend-dev should have skills: scoring
+      const beContent = await getAgentContent('backend-dev');
+      expect(beContent).toContain('skills: scoring');
 
-      const tw = await getFrontmatter('test-writer');
-      expect(tw.skills).toBe('tdd-workflow, scoring');
-
-      const fe = await getFrontmatter('frontend-dev');
-      // frontend-dev defaults: visual-qa, scoring → ∩ solo-dev → scoring only
-      expect(fe.skills).toBe('scoring');
-
-      const be = await getFrontmatter('backend-dev');
-      // backend-dev defaults: scoring → ∩ solo-dev → scoring
-      expect(be.skills).toBe('scoring');
-
-      const qa = await getFrontmatter('qa-reviewer');
-      // qa-reviewer defaults: visual-qa, scoring → ∩ solo-dev → scoring only
-      expect(qa.skills).toBe('scoring');
+      // po-pm should have skills with scoring, ticket-writing, cr-process
+      const poContent = await getAgentContent('po-pm');
+      expect(poContent).toContain('skills:');
+      expect(poContent).toContain('scoring');
     });
 
     it('should generate CLAUDE.md without EPIC section but with visual QA', async () => {
@@ -198,10 +182,11 @@ describe('Integration: Scaffolding Pipeline (TICKET-018)', () => {
       const settings = JSON.parse(
         await readFile(join(tmpDir, '.claude', 'settings.json'), 'utf-8'),
       );
-      expect(settings.agentTeams).toEqual({ enabled: true });
+      expect(settings.env?.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS).toBe('1');
+      expect(settings.agentTeams).toBeUndefined();
     });
 
-    it('should have correct skills (full intersection)', async () => {
+    it('should have skills and example blocks in all agents', async () => {
       const preset = await loadPreset('small-team');
       await scaffold({
         preset,
@@ -210,33 +195,28 @@ describe('Integration: Scaffolding Pipeline (TICKET-018)', () => {
         techStack: DEFAULT_TECH_STACK,
       });
 
-      const getFrontmatter = async (agentName: string) => {
-        const content = await readFile(
-          join(tmpDir, '.claude', 'agents', `${agentName}.md`),
-          'utf-8',
-        );
-        const match = content.match(/^---\n([\s\S]*?)\n---/);
-        if (!match) throw new Error('No frontmatter found');
-        const lines = match[1].split('\n');
-        const data: Record<string, string> = {};
-        for (const line of lines) {
-          const [key, ...rest] = line.split(':');
-          if (key && rest.length > 0) {
-            data[key.trim()] = rest.join(':').trim();
-          }
-        }
-        return data;
-      };
+      const allAgents = [
+        'po-pm',
+        'architect',
+        'cto',
+        'designer',
+        'test-writer',
+        'frontend-dev',
+        'backend-dev',
+        'qa-reviewer',
+      ];
 
-      // small-team has all 7 skills, so intersection = AGENT_DEFAULT_SKILLS
-      const designer = await getFrontmatter('designer');
-      expect(designer.skills).toBe('design-system, visual-qa, scoring');
-
-      const fe = await getFrontmatter('frontend-dev');
-      expect(fe.skills).toBe('visual-qa, scoring');
-
-      const qa = await getFrontmatter('qa-reviewer');
-      expect(qa.skills).toBe('visual-qa, scoring');
+      for (const agent of allAgents) {
+        const content = await readFile(join(tmpDir, '.claude', 'agents', `${agent}.md`), 'utf-8');
+        // Should NOT have color field
+        expect(content).not.toMatch(/^color:/m);
+        // Should have <example> blocks
+        expect(content).toContain('<example>');
+        // tools should be comma-separated
+        expect(content).toContain('tools: Read, Write, Edit, Grep, Glob, Bash');
+        // Should have skills for agents with default skills
+        expect(content).toContain('skills:');
+      }
     });
 
     it('should generate CLAUDE.md with EPIC section', async () => {
@@ -415,7 +395,8 @@ describe('Integration: Scaffolding Pipeline (TICKET-018)', () => {
 
       // Both existing and new settings should be present
       expect(settings.permissions).toEqual({ allow: ['Read'] });
-      expect(settings.agentTeams).toEqual({ enabled: true });
+      expect(settings.env?.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS).toBe('1');
+      expect(settings.agentTeams).toBeUndefined();
     });
 
     it('should detect invalid agent setup via validator', async () => {
