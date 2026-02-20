@@ -9,7 +9,7 @@ Scaffold Claude Code Agent Teams into your project.
 
 - **3 built-in presets** — Solo Dev, Small Team, Full Team
 - **8 agent types** — PO/PM, Architect, CTO, Designer, Test Writer, Frontend Dev, Backend Dev, QA Reviewer
-- **7 skill packages** — scoring, visual-qa, tdd-workflow, adr-writing, ticket-writing, design-system, cr-process
+- **8 skill packages** — scoring, visual-qa, tdd-workflow, adr-writing, ticket-writing, design-system, cr-process, sync-spec
 - **Interactive and non-interactive modes**
 - **Built-in validation** — checks frontmatter, skills references, and project structure
 - **Claude Code integration** — auto-launch with Agent Teams enabled
@@ -24,9 +24,9 @@ npx create-agent-system
 
 | Preset | Scale | Agents | Skills | QA Mode | Visual QA | EPIC-based |
 |--------|-------|--------|--------|---------|-----------|------------|
-| solo-dev | small | 5 | 4 | lite | Level 1 | No |
-| small-team | medium | 8 | 7 | standard | Level 2 | Yes |
-| full-team | large | 8 | 7 | standard | Level 3 | Yes |
+| solo-dev | small | 5 | 5 | lite | Level 1 | No |
+| small-team | medium | 8 | 8 | standard | Level 2 | Yes |
+| full-team | large | 8 | 8 | standard | Level 3 | Yes |
 
 ## Usage
 
@@ -60,6 +60,18 @@ npx create-agent-system validate
 
 Check your agent configuration for errors and warnings.
 
+### Sync with official spec
+
+After scaffolding, use the `/sync-spec` skill in Claude Code to verify your configuration
+against the latest official Claude Code documentation:
+
+```bash
+claude
+> /sync-spec
+```
+
+This skill uses Context7 MCP to fetch the latest spec and compare it with your bundled configuration.
+
 ### Target a specific directory
 
 ```bash
@@ -88,7 +100,8 @@ your-project/
     │   ├── adr-writing/SKILL.md
     │   ├── ticket-writing/SKILL.md
     │   ├── design-system/SKILL.md
-    │   └── cr-process/SKILL.md
+    │   ├── cr-process/SKILL.md
+    │   └── sync-spec/SKILL.md
     └── settings.json
 ```
 
