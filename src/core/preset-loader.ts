@@ -1,12 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { PresetName, WorkflowConfig } from '../types/config.js';
 import type { Preset } from '../types/preset.js';
 import { PRESET_NAMES } from '../utils/constants.js';
+import { PRESETS_DIR } from '../utils/paths.js';
 import { safeParseYaml } from '../utils/yaml.js';
-
-const presetsDir = fileURLToPath(new URL('../../presets/', import.meta.url));
 
 export interface RawWorkflow {
   review_max_rounds: number;
@@ -39,7 +37,7 @@ export function listPresets(): PresetName[] {
 }
 
 export function getPresetPath(presetName: PresetName): string {
-  return join(presetsDir, `${presetName}.yaml`);
+  return join(PRESETS_DIR, `${presetName}.yaml`);
 }
 
 export function parsePresetContent(content: string, presetName: string): Preset {

@@ -1,10 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import Handlebars from 'handlebars';
 import type { AgentName } from '../types/config.js';
-
-const templatesDir = fileURLToPath(new URL('../../templates/', import.meta.url));
+import { TEMPLATES_DIR } from '../utils/paths.js';
 
 const templateCache = new Map<string, ReturnType<typeof Handlebars.compile>>();
 
@@ -55,7 +53,7 @@ export async function renderTemplate(
       }
       throw new Error(`Template not found: ${templatePath}`);
     }
-    compiled = Handlebars.compile(content);
+    compiled = Handlebars.compile(content, { noEscape: true });
     templateCache.set(templatePath, compiled);
   }
   return compiled(data);
@@ -65,7 +63,7 @@ export async function renderAgentTemplate(
   agentName: AgentName,
   data: AgentTemplateData,
 ): Promise<string> {
-  const templatePath = join(templatesDir, 'agents', `${agentName}.md.hbs`);
+  const templatePath = join(TEMPLATES_DIR, 'agents', `${agentName}.md.hbs`);
   return renderTemplate(templatePath, { ...data });
 }
 
@@ -87,7 +85,7 @@ const DEFAULT_HEADINGS: Record<string, string> = {
 };
 
 export async function renderClaudeMdTemplate(data: ClaudeMdTemplateData): Promise<string> {
-  const templatePath = join(templatesDir, 'claude-md.hbs');
+  const templatePath = join(TEMPLATES_DIR, 'claude-md.hbs');
   const headings = data.headings ?? DEFAULT_HEADINGS;
   return renderTemplate(templatePath, { ...data, headings });
 }

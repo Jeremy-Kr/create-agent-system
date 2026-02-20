@@ -1,12 +1,10 @@
 import { execFile } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { SkillName } from '../types/config.js';
 import { SKILL_NAMES } from '../utils/constants.js';
 import { dirExists } from '../utils/fs.js';
-
-const templatesDir = fileURLToPath(new URL('../../templates/', import.meta.url));
+import { TEMPLATES_DIR } from '../utils/paths.js';
 
 const SKILL_TIMEOUT = 30_000;
 
@@ -17,7 +15,7 @@ export interface SkillInstallResult {
 }
 
 async function copyFallbackTemplate(skillName: string, targetDir: string): Promise<void> {
-  const templatePath = join(templatesDir, 'skills', skillName, 'SKILL.md.hbs');
+  const templatePath = join(TEMPLATES_DIR, 'skills', skillName, 'SKILL.md.hbs');
   const content = await readFile(templatePath, 'utf-8');
   const skillDir = join(targetDir, '.claude', 'skills', skillName);
   await mkdir(skillDir, { recursive: true });
