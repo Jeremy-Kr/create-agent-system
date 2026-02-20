@@ -12,7 +12,7 @@
 - **프리셋**: solo-dev, small-team, full-team 3종 YAML 프리셋
 - **스캐폴딩 엔진**: Handlebars 기반 템플릿 렌더링, 에이전트/스킬/CLAUDE.md 파일 생성
 - **에이전트 템플릿**: po-pm, architect, cto, designer, test-writer, frontend-dev, backend-dev, qa-reviewer 8종
-- **스킬 템플릿**: scoring, visual-qa, tdd-workflow, adr-writing, ticket-writing, design-system, cr-process 7종
+- **스킬 템플릿**: scoring, visual-qa, tdd-workflow, adr-writing, ticket-writing, design-system, cr-process, sync-spec 8종
 - **검증 엔진**: YAML frontmatter 파싱, 필수 필드, 지원 필드, 스킬 참조, @import 경로 검증
 - **Claude Code 실행 연동**: `--permission-mode plan` + Agent Teams 환경변수 자동 설정
 - **기존 프로젝트 충돌 처리**: `--overwrite` 플래그
@@ -25,3 +25,14 @@
 - **마이그레이션 도구**: 버전 간 설정 업그레이드
 - **i18n**: 한국어/영어 지원 (`--lang` 옵션, 자동 감지)
 - **Claude Code 플러그인 래퍼**: 플러그인 패키지 구조
+
+### Changed
+
+- **DocSpec SSOT 아키텍처**: constants.ts 하드코딩 → doc-spec.ts에서 유도
+- **sync-spec**: CLI 서브커맨드에서 Claude Code skill로 전환
+- **에이전트 템플릿**: description에 `<example>` 블록 추가 (Claude 공식 포맷)
+
+### Fixed
+
+- **번들 경로 해석**: `import.meta.url` 상대경로가 `dist/` 번들에서 깨지는 버그 수정
+- **Handlebars noEscape**: HTML 태그가 이스케이프되는 문제 수정
