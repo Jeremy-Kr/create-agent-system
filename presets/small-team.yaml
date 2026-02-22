@@ -1,5 +1,5 @@
 name: small-team
-description: "소규모 팀용. CTO 리뷰 포함, EPIC 기반 개발."
+description: "For small teams. Includes CTO review, EPIC-based development."
 scale: medium
 
 agents:

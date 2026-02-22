@@ -29,7 +29,7 @@ export const SKILL_NAMES: readonly SkillName[] = [
 
 export const PRESET_NAMES = ['solo-dev', 'small-team', 'full-team'] as const;
 
-// === DocSpec에서 유도 (공식 Claude Code 스펙) ===
+// === Derived from DocSpec (official Claude Code spec) ===
 export const SUPPORTED_FRONTMATTER_FIELDS: readonly string[] = [
   ...BUNDLED_DOC_SPEC.agent.requiredFields,
   ...BUNDLED_DOC_SPEC.agent.optionalFields,
@@ -48,7 +48,7 @@ export const HOOK_EVENTS: readonly string[] = [
   ...BUNDLED_DOC_SPEC.hooks.extensionEvents,
 ];
 
-// === 경로 상수 ===
+// === Path constants ===
 export const AGENTS_DIR = '.claude/agents';
 export const SKILLS_DIR = '.claude/skills';
 export const SETTINGS_FILE = '.claude/settings.json';
@@ -64,7 +64,7 @@ export const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 export const REGISTRY_INDEX_FILE = 'registry.json';
 export const REGISTRY_ENV_VAR = 'CAS_REGISTRY_URL';
 
-// === 우리 도구 고유 상수 ===
+// === Tool-specific constants ===
 export const AGENT_DISPLAY_NAMES: Record<AgentName, string> = {
   'po-pm': 'PO/PM',
   architect: 'Architect',

@@ -1,5 +1,5 @@
 name: solo-dev
-description: "1인 개발자용. 축약된 워크플로우, 핵심 에이전트만."
+description: "For solo developers. Streamlined workflow with essential agents only."
 scale: small
 
 agents:

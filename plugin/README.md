@@ -1,56 +1,56 @@
 # create-agent-system Plugin
 
-Claude Code Agent Teams 스캐폴딩 도구 플러그인.
+Claude Code Agent Teams scaffolding tool plugin.
 
-## 설치
+## Installation
 
 ```bash
 claude plugin add create-agent-system
 ```
 
-## 커맨드
+## Commands
 
 ### /scaffold
 
-프로젝트에 Claude Code Agent Teams 시스템을 스캐폴딩합니다.
+Scaffold a Claude Code Agent Teams system into your project.
 
 ```
-/scaffold                          # 인터랙티브 모드
-/scaffold --preset solo-dev --yes  # 논인터랙티브 모드
+/scaffold                          # Interactive mode
+/scaffold --preset solo-dev --yes  # Non-interactive mode
 ```
 
-프리셋:
-- **solo-dev** — 1인 개발, 축약 워크플로우
-- **small-team** — 소규모 팀, EPIC 기반
-- **full-team** — 대규모 프로젝트, 풀 프로세스
+Presets:
+- **solo-dev** — Solo developer, streamlined workflow
+- **small-team** — Small team, EPIC-based
+- **full-team** — Large project, full process
 
 ### /add
 
-커뮤니티 레지스트리에서 에이전트, 스킬, 프리셋을 설치합니다.
+Install agents, skills, or presets from the community registry.
 
 ```
-/add security-reviewer             # 에이전트/스킬 설치
+/add security-reviewer             # Install agent/skill
 /add --type agent security-reviewer
 ```
 
 ### /search
 
-커뮤니티 레지스트리를 검색합니다.
+Search the community registry.
 
 ```
-/search testing                    # 키워드 검색
-/search --type skill testing       # 스킬만 검색
+/search testing                    # Keyword search
+/search --type skill testing       # Search skills only
 ```
 
 ### /validate
 
-현재 프로젝트의 Agent Teams 설정을 검증합니다.
+Validate Agent Teams configuration in the current project.
 
 ```
-/validate                          # 전체 검증
-/validate --quiet                  # 오류만 출력
+/validate                          # Full validation
+/validate --quiet                  # Errors only
 ```
 
-## 라이선스
+## License
 
 MIT

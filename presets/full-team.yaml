@@ -1,5 +1,5 @@
 name: full-team
-description: "대규모 프로젝트. 모든 에이전트, 풀 리뷰 사이클, Strict Visual QA."
+description: "For large projects. All agents, full review cycle, strict Visual QA."
 scale: large
 
 agents:
