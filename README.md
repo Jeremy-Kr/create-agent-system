@@ -5,6 +5,14 @@
 
 Scaffold Claude Code Agent Teams into your project.
 
+## Why
+
+The AI agent paradigm evolves daily — new capabilities, new patterns, new best practices. In this fast-moving landscape, **the official documentation is the single source of truth (SSOT)**.
+
+This tool is built around that principle. Rather than hardcoding conventions that go stale, create-agent-system derives its validation rules, supported fields, and agent configurations from the official Claude Code spec. The bundled `/sync-spec` skill lets you verify your setup against the latest documentation at any time, so your agent system stays current as the paradigm shifts underneath.
+
+**The goal: scaffold once, stay up to date forever.**
+
 ## Features
 
 - **3 built-in presets** — Solo Dev, Small Team, Full Team
