@@ -1,9 +1,16 @@
 ---
 name: design-system
-description: "Design system construction guide. Use when creating design tokens, scaffolding components, or generating spacing guides."
+description: "Code-based design system construction guide. Activate when creating design tokens, scaffolding reusable components, generating spacing guides, or establishing visual consistency. Triggers: design system, tokens, components, spacing, typography, color palette."
 ---
 
 # Design System Guide
+
+## When to Activate
+- Creating a new design system for a project (designer)
+- Defining design tokens (colors, spacing, typography)
+- Scaffolding reusable UI components
+- Mapping design tokens to Tailwind/CSS variables
+- Establishing visual consistency standards
 
 ## Deliverables
 
@@ -18,6 +25,7 @@ description: "Design system construction guide. Use when creating design tokens,
 - `tailwind.config.ts` extension or `src/styles/globals.css` CSS variables
 
 ### 3. Base Component Scaffolding
+
 | Component | Variants |
 |-----------|----------|
 | Button | Primary, Secondary, Ghost, Destructive, each size (sm/md/lg) |
@@ -29,6 +37,13 @@ description: "Design system construction guide. Use when creating design tokens,
 
 ### 4. Spacing/Margin Guide (`docs/design-system.md`)
 
-## Scope Limitation
-The agent generates a code-based design system.
-This produces working components and tokens, not Figma mockups.
+## Guidelines
+1. The agent generates a code-based design system — not Figma mockups
+2. All components must use design tokens — no hardcoded values
+3. Components must be accessible (aria attributes, keyboard navigation)
+4. Document token usage in `docs/design-system.md`
+
+## Integration
+- designer: Primary author
+- frontend-dev: Consumes tokens and components
+- visual-qa: Verifies compliance against tokens

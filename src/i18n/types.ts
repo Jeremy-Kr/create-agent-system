@@ -127,6 +127,7 @@ export interface Messages {
   'skill.design_system': string;
   'skill.cr_process': string;
   'skill.sync_spec': string;
+  'skill.context_engineering': string;
 
   // === Template headings (claude-md.hbs) ===
   'heading.project_memory': string;

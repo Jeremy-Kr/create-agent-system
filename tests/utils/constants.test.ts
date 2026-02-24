@@ -35,8 +35,8 @@ describe('Constants (TICKET-003)', () => {
   });
 
   describe('SKILL_NAMES', () => {
-    it('should have exactly 8 entries', () => {
-      expect(SKILL_NAMES).toHaveLength(8);
+    it('should have exactly 9 entries', () => {
+      expect(SKILL_NAMES).toHaveLength(9);
     });
 
     it('should contain all skill names', () => {
@@ -47,6 +47,7 @@ describe('Constants (TICKET-003)', () => {
       expect(SKILL_NAMES).toContain('ticket-writing');
       expect(SKILL_NAMES).toContain('design-system');
       expect(SKILL_NAMES).toContain('cr-process');
+      expect(SKILL_NAMES).toContain('context-engineering');
     });
   });
 
@@ -187,56 +188,60 @@ describe('Constants (TICKET-003)', () => {
       expect(Object.keys(AGENT_DEFAULT_SKILLS)).toHaveLength(8);
     });
 
-    it('po-pm should have scoring, ticket-writing, cr-process', () => {
+    it('po-pm should have scoring, ticket-writing, cr-process, context-engineering', () => {
       expect(AGENT_DEFAULT_SKILLS['po-pm']).toEqual(
-        expect.arrayContaining(['scoring', 'ticket-writing', 'cr-process']),
+        expect.arrayContaining(['scoring', 'ticket-writing', 'cr-process', 'context-engineering']),
       );
-      expect(AGENT_DEFAULT_SKILLS['po-pm']).toHaveLength(3);
+      expect(AGENT_DEFAULT_SKILLS['po-pm']).toHaveLength(4);
     });
 
-    it('architect should have scoring, adr-writing', () => {
+    it('architect should have scoring, adr-writing, context-engineering', () => {
       expect(AGENT_DEFAULT_SKILLS.architect).toEqual(
-        expect.arrayContaining(['scoring', 'adr-writing']),
+        expect.arrayContaining(['scoring', 'adr-writing', 'context-engineering']),
       );
-      expect(AGENT_DEFAULT_SKILLS.architect).toHaveLength(2);
+      expect(AGENT_DEFAULT_SKILLS.architect).toHaveLength(3);
     });
 
-    it('cto should have scoring', () => {
-      expect(AGENT_DEFAULT_SKILLS.cto).toEqual(expect.arrayContaining(['scoring']));
-      expect(AGENT_DEFAULT_SKILLS.cto).toHaveLength(1);
+    it('cto should have scoring, context-engineering', () => {
+      expect(AGENT_DEFAULT_SKILLS.cto).toEqual(
+        expect.arrayContaining(['scoring', 'context-engineering']),
+      );
+      expect(AGENT_DEFAULT_SKILLS.cto).toHaveLength(2);
     });
 
-    it('designer should have design-system, visual-qa, scoring', () => {
+    it('designer should have design-system, visual-qa, scoring, context-engineering', () => {
       expect(AGENT_DEFAULT_SKILLS.designer).toEqual(
-        expect.arrayContaining(['design-system', 'visual-qa', 'scoring']),
+        expect.arrayContaining(['design-system', 'visual-qa', 'scoring', 'context-engineering']),
       );
-      expect(AGENT_DEFAULT_SKILLS.designer).toHaveLength(3);
+      expect(AGENT_DEFAULT_SKILLS.designer).toHaveLength(4);
     });
 
-    it('test-writer should have tdd-workflow, scoring', () => {
+    it('test-writer should have tdd-workflow, scoring, context-engineering', () => {
       expect(AGENT_DEFAULT_SKILLS['test-writer']).toEqual(
-        expect.arrayContaining(['tdd-workflow', 'scoring']),
+        expect.arrayContaining(['tdd-workflow', 'scoring', 'context-engineering']),
       );
-      expect(AGENT_DEFAULT_SKILLS['test-writer']).toHaveLength(2);
+      expect(AGENT_DEFAULT_SKILLS['test-writer']).toHaveLength(3);
     });
 
-    it('frontend-dev should have visual-qa, scoring', () => {
+    it('frontend-dev should have visual-qa, scoring, context-engineering', () => {
       expect(AGENT_DEFAULT_SKILLS['frontend-dev']).toEqual(
-        expect.arrayContaining(['visual-qa', 'scoring']),
+        expect.arrayContaining(['visual-qa', 'scoring', 'context-engineering']),
       );
-      expect(AGENT_DEFAULT_SKILLS['frontend-dev']).toHaveLength(2);
+      expect(AGENT_DEFAULT_SKILLS['frontend-dev']).toHaveLength(3);
     });
 
-    it('backend-dev should have scoring', () => {
-      expect(AGENT_DEFAULT_SKILLS['backend-dev']).toEqual(expect.arrayContaining(['scoring']));
-      expect(AGENT_DEFAULT_SKILLS['backend-dev']).toHaveLength(1);
+    it('backend-dev should have scoring, context-engineering', () => {
+      expect(AGENT_DEFAULT_SKILLS['backend-dev']).toEqual(
+        expect.arrayContaining(['scoring', 'context-engineering']),
+      );
+      expect(AGENT_DEFAULT_SKILLS['backend-dev']).toHaveLength(2);
     });
 
-    it('qa-reviewer should have visual-qa, scoring', () => {
+    it('qa-reviewer should have visual-qa, scoring, context-engineering', () => {
       expect(AGENT_DEFAULT_SKILLS['qa-reviewer']).toEqual(
-        expect.arrayContaining(['visual-qa', 'scoring']),
+        expect.arrayContaining(['visual-qa', 'scoring', 'context-engineering']),
       );
-      expect(AGENT_DEFAULT_SKILLS['qa-reviewer']).toHaveLength(2);
+      expect(AGENT_DEFAULT_SKILLS['qa-reviewer']).toHaveLength(3);
     });
   });
 

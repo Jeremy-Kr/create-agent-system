@@ -140,6 +140,7 @@ export const en: Messages = {
   'skill.design_system': 'Design system management',
   'skill.cr_process': 'Change request process',
   'skill.sync_spec': 'Official doc drift detection via Context7',
+  'skill.context_engineering': 'Context engineering principles',
 
   // === Template headings ===
   'heading.project_memory': 'Project Memory',

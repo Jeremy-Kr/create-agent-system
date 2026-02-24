@@ -1,15 +1,19 @@
 ---
 name: tdd-workflow
-description: "TDD workflow guide. Test first, Sanity Check, Implement, QA pattern. Use for test writing or TDD-related work."
+description: "Test-Driven Development workflow: Red → Gate → Green → Verify. Activate when writing tests before implementation, performing test sanity checks, or following TDD methodology. Triggers: write tests, TDD, test first, red green refactor."
 ---
 
 # TDD Workflow
 
-## Principles
-- Write tests first (Red)
-- **PO/PM gates test quality with Sanity Check (Gate)**
-- Implementation agents make tests pass (Green)
-- QA agent adds E2E/integration tests (Verify) — skipped for Small projects
+## When to Activate
+- Writing test cases before implementation (test-writer)
+- Sanity checking test coverage against acceptance criteria (PO/PM)
+- Implementing code to pass failing tests (frontend-dev, backend-dev)
+- Verifying test results post-implementation (qa-reviewer)
+
+## Core Concepts
+
+TDD in this system follows a 4-phase flow with a quality gate between test writing and implementation.
 
 ## Phase Flow
 
@@ -35,3 +39,15 @@ description: "TDD workflow guide. Test first, Sanity Check, Implement, QA patter
 ### Verify Phase (qa-reviewer)
 - **Standard QA (Medium/Large)**: E2E tests + integration tests + Visual QA + code review + scoring
 - **Lite QA (Small)**: Unit test pass check + code review + Visual QA Level 1 (no scoring)
+
+## Guidelines
+1. Tests must be committed in failing state — implementation agents turn them green
+2. Each test case name must clearly reference its acceptance criterion
+3. Do not test behavior not described in the spec
+4. Target unit test coverage: 80%+
+
+## Integration
+- test-writer: Primary user (Red phase)
+- po-pm: Gate phase (Sanity Check)
+- frontend-dev, backend-dev: Green phase
+- qa-reviewer: Verify phase

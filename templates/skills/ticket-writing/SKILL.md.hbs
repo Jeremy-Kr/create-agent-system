@@ -1,9 +1,15 @@
 ---
 name: ticket-writing
-description: "User story-based ticket writing guide. Use when breaking down specs into tickets."
+description: "User story-based ticket writing with EPIC grouping and dependency mapping. Activate when breaking down specs into implementable tickets, creating EPICs, or mapping ticket dependencies. Triggers: write tickets, create stories, EPIC breakdown, task decomposition."
 ---
 
 # Ticket Writing Guide
+
+## When to Activate
+- Breaking down a spec document into implementable tickets (po-pm)
+- Creating EPIC groupings for medium/large projects
+- Mapping dependencies between tickets or EPICs
+- Estimating effort for implementation tasks
 
 ## Ticket Format (Medium/Large)
 
@@ -23,6 +29,7 @@ description: "User story-based ticket writing guide. Use when breaking down spec
 ```
 
 ## Small Project Ticket Format
+
 Write a flat ticket list without EPIC grouping:
 
 ```markdown
@@ -37,7 +44,9 @@ Write a flat ticket list without EPIC grouping:
 ```
 
 ## EPIC Dependencies (Medium/Large)
+
 Always include an EPIC dependency map when writing tickets:
+
 ```markdown
 ## EPIC Dependency Map
 EPIC-01 (Auth) → None
@@ -45,8 +54,14 @@ EPIC-02 (Dashboard) → EPIC-01
 EPIC-03 (Settings) → EPIC-01, EPIC-02
 ```
 
-## Rules
-- Max 2 hours per ticket for a senior developer, smaller is better
-- User story format is required
-- Acceptance criteria must include error handling and edge cases
-- Dependencies must be explicitly recorded
+## Guidelines
+1. Max 2 hours per ticket for a senior developer — smaller is better
+2. User story format is required for every ticket
+3. Acceptance criteria must include error handling and edge cases
+4. Dependencies must be explicitly recorded
+5. Each acceptance criterion becomes one test case (maps to tdd-workflow)
+
+## Integration
+- po-pm: Primary author
+- test-writer: Consumes tickets to write tests (1:1 mapping)
+- tdd-workflow: Each acceptance criterion → one test case

@@ -47,4 +47,5 @@ export type SkillName =
   | 'ticket-writing'
   | 'design-system'
   | 'cr-process'
-  | 'sync-spec';
+  | 'sync-spec'
+  | 'context-engineering';

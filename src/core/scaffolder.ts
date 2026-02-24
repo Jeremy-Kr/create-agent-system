@@ -10,7 +10,10 @@ import {
   AGENT_DISPLAY_NAMES,
   AGENTS_DIR,
   CLAUDE_MD_FILE,
+  CONTEXT_DIR,
   FILE_OWNERSHIP,
+  LOGS_DIR,
+  MAILBOX_DIR,
   SETTINGS_FILE,
 } from '../utils/constants.js';
 import { ensureDir, fileExists, writeFileSafe } from '../utils/fs.js';
@@ -225,6 +228,54 @@ async function mergeSettingsJson(
   return [{ path: settingsPath, action: 'created' }];
 }
 
+async function writeContextLayer(
+  targetDir: string,
+  dryRun: boolean | undefined,
+): Promise<ScaffoldResult['files']> {
+  const files: ScaffoldResult['files'] = [];
+  const dirs = [
+    join(targetDir, CONTEXT_DIR),
+    join(targetDir, MAILBOX_DIR),
+    join(targetDir, LOGS_DIR),
+  ];
+
+  if (dryRun) {
+    files.push({ path: join(targetDir, CONTEXT_DIR, 'scratch-pad.md'), action: 'created' });
+    files.push({ path: join(targetDir, CONTEXT_DIR, 'decisions.jsonl'), action: 'created' });
+    return files;
+  }
+
+  for (const dir of dirs) {
+    await ensureDir(dir);
+  }
+
+  const scratchPadPath = join(targetDir, CONTEXT_DIR, 'scratch-pad.md');
+  const scratchPadContent = `# Scratch Pad
+
+Working memory for intermediate results, tool outputs, and temporary notes.
+Agents write here to offload context from the conversation window.
+
+---
+
+`;
+  const scratchResult = await writeFileSafe(scratchPadPath, scratchPadContent);
+  files.push({
+    path: scratchPadPath,
+    action: scratchResult.skipped ? 'skipped' : 'created',
+  });
+
+  const decisionsPath = join(targetDir, CONTEXT_DIR, 'decisions.jsonl');
+  const decisionsContent = `{"_schema":"decision","_version":"1.0","_description":"Append-only log of agent decisions. Each line: {agent, decision, reason, ts}"}
+`;
+  const decisionsResult = await writeFileSafe(decisionsPath, decisionsContent);
+  files.push({
+    path: decisionsPath,
+    action: decisionsResult.skipped ? 'skipped' : 'created',
+  });
+
+  return files;
+}
+
 async function installSkillsWithWarnings(
   skills: SkillName[],
   targetDir: string,
@@ -315,6 +366,9 @@ export async function scaffold(config: ScaffoldConfig): Promise<ScaffoldResult> 
 
   // 7. settings.json (with hooks)
   result.files.push(...(await mergeSettingsJson(targetDir, preset, dryRun)));
+
+  // 8. Context layer (scratch pad, decisions log, mailbox)
+  result.files.push(...(await writeContextLayer(targetDir, dryRun)));
 
   return result;
 }

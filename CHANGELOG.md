@@ -2,6 +2,27 @@
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
+## [0.2.0] - 2026-02-24
+
+Context Engineering & Philosophy Integration release.
+
+### Added
+
+- **context-engineering skill**: New skill covering context budget, Progressive Disclosure (L1→L2→L3), compression strategies, inter-agent communication
+- **Progressive Disclosure**: 3-layer context loading model (L1 Metadata → L2 Module → L3 Data) in CLAUDE.md and context-engineering skill
+- **Extended Thinking**: architect (`ultrathink`) and cto (`think hard`) agent templates now include extended thinking guidance
+- **Common Rules**: 6 new rules in CLAUDE.md template — simplicity first, precise edits, explore→plan→code→commit workflow, security, parallel processing, SSOT principle
+- **Context layer scaffolding**: `scaffold()` now creates `.claude/context/`, `mailbox/`, `logs/`, `scratch-pad.md`, `decisions.jsonl`
+- **Compression techniques**: Anchored summarization, probe-based evaluation, tokens-per-task budgeting
+
+### Changed
+
+- **CLAUDE.md Context Engineering section**: Simplified from 12 lines to 9 lines — detailed content delegated to context-engineering skill (Tool Consolidation principle)
+- **Hooks**: All Stop hooks now include code simplification reminder; Write|Edit hooks include `.env`/secret detection; medium Task hook prevents Telephone Game
+- **Skill templates**: All 8 skills enhanced with "When to Activate", "Guidelines", "Integration" sections per Agent Skills spec
+- **sync-spec skill**: Strengthened SSOT principle — "official docs win, always"
+- **Presets**: All 3 presets now include context-engineering skill
+
 ## [0.1.0] - 2026-02-19
 
 Initial release.

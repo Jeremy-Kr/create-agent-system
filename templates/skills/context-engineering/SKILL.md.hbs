@@ -1,0 +1,106 @@
+---
+name: context-engineering
+description: "Context engineering principles for agent teams. Activate when managing context budgets, preventing context degradation, compressing long sessions, or optimizing inter-agent communication. Triggers: context budget, token usage, lost in middle, compress context, session too long, agent communication."
+---
+
+# Context Engineering for Agent Teams
+
+## When to Activate
+- Session context is growing large and needs compression
+- An agent is losing track of earlier instructions or decisions
+- Inter-agent task delegation needs to preserve fidelity
+- Planning context loading strategy for a new task
+- Debugging why an agent produced unexpected output
+
+## Progressive Disclosure (L1 → L2 → L3)
+
+Context loading follows three layers:
+
+| Layer | What | When | Examples |
+|-------|------|------|----------|
+| **L1 Metadata** | Always-loaded identifiers | Session start | CLAUDE.md, agent frontmatter |
+| **L2 Module** | On-demand knowledge | Task requires it | Skills, ADRs, specs, type definitions |
+| **L3 Data** | Just-in-time content | Specific operation | Tool outputs, file contents, test results |
+
+**Rule**: Never promote L3 to L1. If you need a file repeatedly, summarize it to scratch-pad (still L3, but smaller).
+
+## Context Budget
+
+Every token in the context window has an opportunity cost. Tool outputs consume ~83% of total context.
+
+### Loading Strategy
+1. Read only files in your "Read on Session Start" list initially (L1)
+2. Load "Reference as Needed" files only when the task requires them (L2)
+3. Never read files in your "Do Not Read" list unless explicitly requested
+4. Tool outputs are L3 — offload results to `.claude/context/scratch-pad.md`
+
+### Token-Efficient Practices
+- Prefer `Grep` over reading entire files — search, then read only relevant sections
+- When tool output is large, summarize key findings to scratch pad before continuing
+- If a file exceeds 200 lines, read only the relevant section with offset/limit
+
+## Context Degradation Prevention
+
+### U-Shaped Attention
+Models pay more attention to the beginning and end of context. Place critical information (rules, constraints) at the top of files and summaries at the bottom.
+
+### Lost-in-Middle Mitigation
+- Break long instructions into numbered steps
+- Use tables for structured data (easier to scan than prose)
+- Repeat critical constraints at decision points
+
+### Context Poisoning Prevention
+- Use append-only JSONL for decisions — never edit past entries
+- When an assumption changes, log the change explicitly rather than silently updating
+- One source of truth per domain (see file ownership in CLAUDE.md)
+
+## Inter-Agent Communication
+
+### Telephone Game Prevention
+When delegating tasks between agents, forward the original content verbatim:
+
+**Bad**: "The user wants authentication" (paraphrased, loses detail)
+**Good**: Forward the original ticket/spec text directly
+
+### Mailbox Protocol
+- Write messages to `.claude/context/mailbox/{from}→{to}.md`
+- Include: what changed, what the receiving agent should do, relevant file paths
+- Receiving agent checks mailbox at session start
+
+## Session Continuity
+
+### Decision Log
+Append every significant decision to `.claude/context/decisions.jsonl`:
+```json
+{"agent":"backend-dev","decision":"Use Drizzle ORM over Prisma","reason":"Better type inference, lighter bundle","ts":"2026-02-24T10:00:00Z"}
+```
+
+### Scratch Pad
+Use `.claude/context/scratch-pad.md` for:
+- Intermediate analysis results
+- Tool output summaries
+- Working hypotheses
+- Plan drafts before finalization
+
+## Compression Strategy
+
+When context grows large (pre-compact):
+1. **Preserve**: Current task, acceptance criteria, file paths, recent decisions
+2. **Summarize**: Completed work, resolved discussions (anchored summarization — tie summaries to specific file paths and line ranges)
+3. **Drop**: Superseded plans, failed approaches, verbose tool outputs
+
+### Techniques
+- **Anchored Summarization**: Instead of "fixed the auth bug", write "fixed auth bug in `src/auth/middleware.ts:45-62` — added token expiry check"
+- **Probe-based Evaluation**: After compression, verify retained context by asking "What are the acceptance criteria?" — if you can't answer, critical info was lost
+- **Tokens-per-task Budgeting**: Estimate tokens needed before starting a sub-task. If tool output will be large (e.g., full test suite), redirect to file instead of inline
+
+## Guidelines
+1. Every agent should check their context budget before reading new files
+2. Log all cross-agent communications to the mailbox
+3. Use the decisions log as the single source of truth for "why" questions
+4. Prefer structured formats (tables, JSONL) over prose for data
+
+## Integration
+- All agents: Context budget awareness, scratch pad usage
+- Orchestrator: Manages inter-agent mailbox, monitors context health
+- scoring: Context efficiency can be part of QA scoring

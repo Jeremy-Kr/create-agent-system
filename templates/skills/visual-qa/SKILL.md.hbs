@@ -1,9 +1,15 @@
 ---
 name: visual-qa
-description: "Playwright MCP-based visual quality verification. Use when screenshot-based QA is needed after UI implementation. Level system for progressive application."
+description: "Playwright MCP-based visual quality verification with progressive Level system. Activate when screenshot-based QA is needed after UI implementation, when verifying design system compliance, or when checking responsive behavior. Triggers: visual QA, screenshot, design check, responsive test, UI verification."
 ---
 
 # Visual QA with Playwright MCP
+
+## When to Activate
+- After implementing UI components (frontend-dev)
+- During design system compliance checks (designer)
+- Final QA verification of visual elements (qa-reviewer)
+- When the EPIC or task specifies a Visual QA Level
 
 ## Visual QA Levels
 
@@ -22,7 +28,7 @@ Orchestrator designates per EPIC or task.
 ### Level 2: Standard (Default)
 - **When**: After design system is established, general EPICs
 - **Screenshots**: Mobile (375px) + Desktop (1280px)
-- **Scoring**: 100 points, simplified weights
+- **Scoring**: 100 points
   - Design token compliance: 35 points
   - Responsive behavior: 35 points
   - Overall completeness: 30 points
@@ -30,7 +36,7 @@ Orchestrator designates per EPIC or task.
 ### Level 3: Strict
 - **When**: Landing pages, payment flows, UX-critical EPICs
 - **Screenshots**: Mobile (375px) + Tablet (768px) + Desktop (1280px)
-- **Scoring**: 100 points, full weights
+- **Scoring**: 100 points
   - Design token compliance: 30 points
   - Responsive behavior: 25 points
   - Interaction states: 20 points
@@ -49,3 +55,14 @@ Orchestrator designates per EPIC or task.
 - [ ] Interaction states (hover, focus, active, disabled)
 - [ ] Dark mode (if applicable)
 - [ ] Animations / transitions
+
+## Guidelines
+1. Always specify which Visual QA Level you are performing
+2. Save screenshots to `.claude/context/screenshots/` for reference
+3. Use scoring skill format for Level 2+ evaluations
+
+## Integration
+- designer: Primary visual QA performer
+- frontend-dev: Self-check before QA handoff
+- qa-reviewer: Final visual verification
+- scoring: Used for Level 2+ scoring format

@@ -4,10 +4,10 @@ import { HOOK_EVENTS } from '../../src/utils/constants.js';
 
 describe('hooks-generator', () => {
   describe('generateHooks', () => {
-    it('small scale returns SessionStart and Stop only', () => {
+    it('small scale returns SessionStart, Stop, and PreCompact', () => {
       const hooks = generateHooks('small');
       const events = Object.keys(hooks);
-      expect(events).toEqual(['SessionStart', 'Stop']);
+      expect(events).toEqual(['SessionStart', 'Stop', 'PreCompact']);
     });
 
     it('medium scale includes PreToolUse and PostToolUse', () => {

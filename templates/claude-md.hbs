@@ -10,22 +10,16 @@
 - Do not modify finalized specs without a CR (Change Request)
 - All feedback must be scored on a 100-point scale (1-point increments) with specific deduction reasons
 {{#if visualQa}}- Visual QA is performed at the designated Level (default: Level {{visualQaLevel}}){{/if}}
-
-## {{headings.buildCommands}}
-- `{{packageManager}} dev` — Dev server
-- `{{packageManager}} test` — Unit tests
-- `{{packageManager}} test:e2e` — E2E tests
-- `{{packageManager}} lint` — Lint
-
-## {{headings.codeStyle}}
-- TypeScript strict mode
-- Functional components + hooks
-- Named exports preferred
-- 2-space indentation
+- Simplicity first — do not add features, abstractions, or error handling not explicitly requested
+- Precise edits — change only what is requested, leave the rest untouched
+- Workflow: Explore → Plan → Code → Commit (always in this order)
+- Security: No hardcoded secrets, no `.env` commits, no dynamic code evaluation
+- Parallel processing: Read independent files in parallel, run independent searches concurrently
+- SSOT: Official Claude Code documentation is the single source of truth — when in doubt, verify with `sync-spec` skill
 
 ## {{headings.agentContextRules}}
 
-Each agent follows this table.
+Each agent follows this table. Load only what you need — avoid reading files outside your scope.
 
 | Agent | Read on Session Start | Reference as Needed | Do Not Read |
 |-------|----------------------|--------------------|-----------------------------------------|
@@ -49,6 +43,33 @@ Each agent follows this table.
 |------|-------------|-------------|-----------------|
 | `src/types/shared.ts` | backend-dev | frontend-dev (read-only) | BE notifies FE via mailbox after changes |
 | `src/utils/common.ts` | Orchestrator only | All | Agents request changes via Orchestrator |
+
+## {{headings.buildCommands}}
+- `{{packageManager}} dev` — Dev server
+- `{{packageManager}} test` — Unit tests
+- `{{packageManager}} test:e2e` — E2E tests
+- `{{packageManager}} lint` — Lint
+
+## {{headings.codeStyle}}
+- TypeScript strict mode
+- Functional components + hooks
+- Named exports preferred
+- 2-space indentation
+
+## Context Engineering
+
+Context is a scarce resource. See `context-engineering` skill for detailed guidelines.
+
+### Progressive Disclosure (L1 → L2 → L3)
+- **L1 Metadata**: CLAUDE.md, agent frontmatter — always loaded
+- **L2 Module**: Skills, ADRs, specs — loaded on demand per Agent Context Rules table
+- **L3 Data**: Tool outputs, file contents — loaded just-in-time, offload results to `.claude/context/scratch-pad.md`
+
+### Key Principles
+- Every token has an opportunity cost — prefer targeted reads over full-file reads
+- Forward original content between agents — never paraphrase (Telephone Game prevention)
+- Append decisions to `.claude/context/decisions.jsonl` for session continuity
+- Use `.claude/context/mailbox/` for async inter-agent messages
 
 ## {{headings.failureModes}}
 

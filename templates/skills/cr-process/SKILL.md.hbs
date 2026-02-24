@@ -1,11 +1,22 @@
 ---
 name: cr-process
-description: "Change Request process. Use when changes are needed after spec finalization."
+description: "Change Request process for post-finalization modifications. Activate when specs need changes after approval, when architecture decisions need amending, or when implementation reveals spec gaps. Triggers: change request, CR, spec change, amend ADR."
 ---
 
 # Change Request Process
 
+## When to Activate
+- A dev agent discovers the spec is incomplete or incorrect during implementation
+- Architecture needs to change after ADRs are finalized
+- New requirements emerge after ticket creation
+- Implementation reveals a spec gap or conflict
+
+## Core Concepts
+
+CRs are the controlled mechanism for changing finalized specs. They prevent ad-hoc modifications and ensure impact is tracked.
+
 ## CR Document Format
+
 ```markdown
 ## CR-{number}: {title}
 
@@ -32,3 +43,13 @@ description: "Change Request process. Use when changes are needed after spec fin
 3. Proceed with approval process based on severity
 4. On approval, Architect writes ADR Amendment
 5. Save CR document to `docs/cr/`
+
+## Guidelines
+1. Never modify finalized specs without a CR — this is a hard rule
+2. Log all CRs to `.claude/context/decisions.jsonl` for traceability
+3. CRs below Major severity can be self-approved by PO/PM
+
+## Integration
+- po-pm: Receives and evaluates CRs
+- architect: Writes ADR amendments on approval
+- All dev agents: Can request CRs when spec gaps are found

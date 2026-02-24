@@ -1,11 +1,18 @@
 ---
 name: adr-writing
-description: "ADR (Architecture Decision Record) writing guide. Use when documenting architecture decisions."
+description: "Architecture Decision Record writing and maintenance guide. Activate when documenting technology choices, recording architecture decisions, or amending existing ADRs after Change Requests. Triggers: ADR, architecture decision, tech choice, document decision."
 ---
 
 # ADR Writing Guide
 
+## When to Activate
+- Documenting a new architecture or technology decision (architect)
+- Comparing alternatives for a technical approach
+- Amending an existing ADR after a CR approval
+- Reviewing architecture decisions for consistency
+
 ## Required Structure
+
 All ADRs must follow this structure:
 
 ```markdown
@@ -35,10 +42,24 @@ Visualize with Mermaid diagram (required)
 ```
 
 ## Amendment (for changes after spec finalization)
+
 When a CR (Change Request) is approved, add an Amendment to the existing ADR:
+
 ```markdown
 ## Amendment (CR-{number}, {date})
 - Change: ...
 - Reason: ...
 - Impact scope: ...
 ```
+
+## Guidelines
+1. Every ADR must include a Mermaid diagram for visualization
+2. Always list at least 2 alternatives with explicit rejection reasons
+3. Log ADR creation/amendment to `.claude/context/decisions.jsonl`
+4. ADR numbering is sequential and never reused
+
+## Integration
+- architect: Primary author
+- cto: Technical reviewer
+- po-pm: Triggers amendments via CR process
+- cr-process: Drives ADR amendments

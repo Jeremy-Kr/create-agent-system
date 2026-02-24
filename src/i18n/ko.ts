@@ -153,6 +153,8 @@ export const ko: Messages = {
   'skill.design_system': '\ub514\uc790\uc778 \uc2dc\uc2a4\ud15c \uad00\ub9ac',
   'skill.cr_process': '\ubcc0\uacbd \uc694\uccad \ud504\ub85c\uc138\uc2a4',
   'skill.sync_spec': 'Context7 \uacf5\uc2dd \ubb38\uc11c \ub4dc\ub9ac\ud504\ud2b8 \uac10\uc9c0',
+  'skill.context_engineering':
+    '\ucee8\ud14d\uc2a4\ud2b8 \uc5d4\uc9c0\ub2c8\uc5b4\ub9c1 \uc6d0\uce59',
 
   // === \ud15c\ud50c\ub9bf \uc81c\ubaa9 ===
   'heading.project_memory': 'Project Memory',

@@ -25,6 +25,7 @@ export const SKILL_NAMES: readonly SkillName[] = [
   'design-system',
   'cr-process',
   'sync-spec',
+  'context-engineering',
 ] as const;
 
 export const PRESET_NAMES = ['solo-dev', 'small-team', 'full-team'] as const;
@@ -53,6 +54,9 @@ export const AGENTS_DIR = '.claude/agents';
 export const SKILLS_DIR = '.claude/skills';
 export const SETTINGS_FILE = '.claude/settings.json';
 export const CLAUDE_MD_FILE = 'CLAUDE.md';
+export const CONTEXT_DIR = '.claude/context';
+export const MAILBOX_DIR = '.claude/context/mailbox';
+export const LOGS_DIR = '.claude/context/logs';
 
 export const CONFIG_FILE_NAME = 'agent-system.config.yaml';
 
@@ -128,12 +132,12 @@ export const FILE_OWNERSHIP: Array<{ path: string; owner: string }> = [
 ];
 
 export const AGENT_DEFAULT_SKILLS: Record<AgentName, SkillName[]> = {
-  'po-pm': ['scoring', 'ticket-writing', 'cr-process'],
-  architect: ['scoring', 'adr-writing'],
-  cto: ['scoring'],
-  designer: ['design-system', 'visual-qa', 'scoring'],
-  'test-writer': ['tdd-workflow', 'scoring'],
-  'frontend-dev': ['visual-qa', 'scoring'],
-  'backend-dev': ['scoring'],
-  'qa-reviewer': ['visual-qa', 'scoring'],
+  'po-pm': ['scoring', 'ticket-writing', 'cr-process', 'context-engineering'],
+  architect: ['scoring', 'adr-writing', 'context-engineering'],
+  cto: ['scoring', 'context-engineering'],
+  designer: ['design-system', 'visual-qa', 'scoring', 'context-engineering'],
+  'test-writer': ['tdd-workflow', 'scoring', 'context-engineering'],
+  'frontend-dev': ['visual-qa', 'scoring', 'context-engineering'],
+  'backend-dev': ['scoring', 'context-engineering'],
+  'qa-reviewer': ['visual-qa', 'scoring', 'context-engineering'],
 };

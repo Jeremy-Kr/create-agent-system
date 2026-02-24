@@ -1,23 +1,23 @@
 ---
 name: sync-spec
-description: "Sync agent spec with official Claude Code docs via Context7. Use when checking if agent definitions match the latest official spec."
+description: "Sync agent spec with official Claude Code docs via Context7. Activate when checking if agent definitions match the latest official spec, after Claude Code updates, or when validating frontmatter fields. Triggers: sync spec, check spec, validate fields, spec drift, update doc-spec."
 ---
 
 # Sync Spec — Official Doc Drift Detection
 
-This skill compares your project's agent system spec against the latest official Claude Code documentation.
-
-## Philosophy
-
-SSOT (Single Source of Truth) is the official Claude Code documentation only.
-This tool's bundled spec (`BUNDLED_DOC_SPEC`) is a verified snapshot — not the source of truth itself.
-
-## When to Use
-
+## When to Activate
 - After a Claude Code update to check for spec changes
 - When adding new agent frontmatter fields
 - When unsure if a field/model/hook is officially supported
 - Periodically (e.g., monthly) to catch drift
+
+## Core Concepts
+
+**SSOT Principle**: In a rapidly evolving agent coding landscape, the official Claude Code documentation is the ONLY source of truth.
+- The bundled spec (`BUNDLED_DOC_SPEC`) is a verified snapshot — convenient but NOT authoritative
+- When official docs and bundled spec disagree, official docs win — always
+- Run this sync regularly, especially after Claude Code updates, to prevent drift
+- Every agent benefits from accurate spec — a single stale field can cascade into broken scaffolding
 
 ## Procedure
 
@@ -62,8 +62,11 @@ For each section, report:
 If diffs are found, propose updates to `src/core/doc-spec.ts`.
 Always ask for human approval before modifying the file.
 
-## Important Notes
+## Guidelines
+1. `hooks.extensionEvents` are NOT in official docs — do not flag them as "removed"
+2. When Context7 returns ambiguous results, flag as "needs manual verification"
+3. Log sync results to `.claude/context/decisions.jsonl`
 
-- `hooks.extensionEvents` are NOT in official docs — they are this tool's extensions. Do not flag them as "removed".
-- `agent.toolsFormat` may differ: official docs may show array syntax while bundled says 'comma-separated' or vice versa.
-- When Context7 returns ambiguous results, flag them as "needs manual verification" rather than auto-updating.
+## Integration
+- cto: Triggers periodic spec sync
+- All agents: Benefit from up-to-date spec validation
