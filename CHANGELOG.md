@@ -2,6 +2,18 @@
 
 This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
+## [0.2.1] - 2026-02-24
+
+Bug fixes & validation improvements.
+
+### Fixed
+
+- **Smoke test i18n mismatch**: Test now accepts both Korean and English output strings
+- **Skill install command**: Changed `npx @anthropic/skills add` to `npx skills add`
+- **Doc-spec validator extension events**: `TeammateIdle`/`TaskCompleted` extension events now correctly reported as warnings instead of errors
+- **Import path validation**: Directory paths (e.g., `@docs/adr/`) are now recognized as valid import targets
+- **VERSION constant sync**: `constants.ts` VERSION was stuck at `0.1.0`, now synced to `0.2.1`
+
 ## [0.2.0] - 2026-02-24
 
 Context Engineering & Philosophy Integration release.

@@ -3,7 +3,7 @@ import { t } from '../i18n/index.js';
 import type { Messages } from '../i18n/types.js';
 import type { AgentName, SkillName } from '../types/config.js';
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.1';
 
 export const AGENT_NAMES: readonly AgentName[] = [
   'po-pm',

@@ -317,7 +317,8 @@ async function checkImportPaths(content: string, targetDir: string): Promise<Val
   const issues: ValidationIssue[] = [];
   const importPaths = extractImportPaths(content);
   for (const importPath of importPaths) {
-    if (!(await fileExists(join(targetDir, importPath)))) {
+    const fullPath = join(targetDir, importPath);
+    if (!(await fileExists(fullPath)) && !(await dirExists(fullPath))) {
       issues.push({
         rule: 'INVALID_IMPORT_PATH',
         file: 'CLAUDE.md',

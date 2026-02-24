@@ -101,6 +101,8 @@ export const en: Messages = {
     'Description in {file} is missing <example> blocks. Claude Code uses examples to determine when to trigger agents.',
   'validator.invalid_hook_event':
     "Invalid hook event '{event}' in settings.json. Valid events: {valid}",
+  'validator.extension_hook_event':
+    "Hook event '{event}' is an extension event not yet supported by Claude Code. It will be ignored until officially supported.",
   'validator.invalid_hook_structure':
     "Invalid hook structure in settings.json for event '{event}': {reason}",
 

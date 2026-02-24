@@ -41,7 +41,7 @@ export async function installSkill(
   return new Promise((resolve) => {
     execFile(
       'npx',
-      ['@anthropic/skills', 'add', skillName],
+      ['skills', 'add', skillName],
       { cwd: targetDir, timeout: SKILL_TIMEOUT },
       async (error) => {
         if (error) {
@@ -74,7 +74,7 @@ export async function installFindSkills(targetDir: string): Promise<SkillInstall
   return new Promise((resolve) => {
     execFile(
       'npx',
-      ['@anthropic/skills', 'add', 'find-skills'],
+      ['skills', 'add', 'find-skills'],
       { cwd: targetDir, timeout: SKILL_TIMEOUT },
       (error) => {
         if (error) {

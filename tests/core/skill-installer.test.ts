@@ -43,7 +43,7 @@ describe('Skill Installer (TICKET-009)', () => {
       expect(result.skillName).toBe('scoring');
       expect(mockedExecFile).toHaveBeenCalledWith(
         'npx',
-        ['@anthropic/skills', 'add', 'scoring'],
+        ['skills', 'add', 'scoring'],
         expect.objectContaining({ cwd: targetDir }),
         expect.any(Function),
       );

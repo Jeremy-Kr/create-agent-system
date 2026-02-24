@@ -89,6 +89,7 @@ export interface Messages {
   'validator.invalid_permission_mode': string;
   'validator.missing_example_blocks': string;
   'validator.invalid_hook_event': string;
+  'validator.extension_hook_event': string;
   'validator.invalid_hook_structure': string;
 
   // === Display messages (doc-spec) ===

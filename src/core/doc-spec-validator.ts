@@ -93,18 +93,31 @@ export function validateHooksContent(
 ): DocSpecIssue[] {
   const issues: DocSpecIssue[] = [];
 
+  const extensionEvents = spec.hooks.extensionEvents ?? [];
+
   for (const event of Object.keys(hooks)) {
     if (!spec.hooks.validEvents.includes(event)) {
-      issues.push({
-        rule: 'INVALID_HOOK_EVENT',
-        file: 'settings.json',
-        message: t('validator.invalid_hook_event', {
-          event,
-          valid: spec.hooks.validEvents.join(', '),
-        }),
-        severity: 'error',
-      });
-      continue;
+      if (extensionEvents.includes(event)) {
+        issues.push({
+          rule: 'EXTENSION_HOOK_EVENT',
+          file: 'settings.json',
+          message: t('validator.extension_hook_event', {
+            event,
+          }),
+          severity: 'warning',
+        });
+      } else {
+        issues.push({
+          rule: 'INVALID_HOOK_EVENT',
+          file: 'settings.json',
+          message: t('validator.invalid_hook_event', {
+            event,
+            valid: spec.hooks.validEvents.join(', '),
+          }),
+          severity: 'error',
+        });
+        continue;
+      }
     }
 
     const entries = hooks[event];

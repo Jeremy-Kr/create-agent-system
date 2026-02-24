@@ -114,6 +114,8 @@ export const ko: Messages = {
     '{file}의 description에 <example> 블록이 없습니다. Claude Code는 에이전트 트리거 조건을 example로 판단합니다.',
   'validator.invalid_hook_event':
     "settings.json에 잘못된 hook 이벤트 '{event}'. 유효한 이벤트: {valid}",
+  'validator.extension_hook_event':
+    "hook 이벤트 '{event}'는 아직 Claude Code에서 지원하지 않는 확장 이벤트입니다. 공식 지원 전까지 무시됩니다.",
   'validator.invalid_hook_structure':
     "settings.json의 이벤트 '{event}'에 잘못된 hook 구조: {reason}",
 

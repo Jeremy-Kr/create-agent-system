@@ -21,7 +21,7 @@ describe('Bundle smoke test', () => {
       '--dry-run',
     ]);
     expect(stdout).toContain('DRY RUN');
-    expect(stdout).toContain('Scaffolding complete');
+    expect(stdout.includes('Scaffolding complete') || stdout.includes('스캐폴딩 완료')).toBe(true);
   });
 
   it('should run validate without crashing', async () => {

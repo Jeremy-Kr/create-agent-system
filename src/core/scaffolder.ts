@@ -285,7 +285,7 @@ async function installSkillsWithWarnings(
   for (const sr of results) {
     if (!sr.success) {
       warnings.push(
-        `Skill "${sr.skillName}" installation failed: ${sr.error ?? 'unknown error'}. Install manually with: npx @anthropic/skills add ${sr.skillName}`,
+        `Skill "${sr.skillName}" installation failed: ${sr.error ?? 'unknown error'}. Install manually with: npx skills add ${sr.skillName}`,
       );
     }
   }
